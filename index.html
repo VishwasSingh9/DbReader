@@ -3,12 +3,553 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Button</title>
+    <title>Debug_Tool</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjsf-adapter-date-fns"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <div id="wrapper">
-        <div class="btn-pink">Hire Me</div>
+
+    <!-- Side Panel -->
+    <div class="side-panel">
+        <button onclick="showFilters('all-reports')">FMS-Report</button>
+        <button onclick="showFilters('throughput-filters')">Throughput</button>
+        <button onclick="showFilters('fleet-filters')">Start/Stop Fleet</button>
+        <button onclick="showFilters('error-filters')">Errors</button>
+        <button onclick="showFilters('network-filters')">Network</button>
+        <button onclick="showFilters('task-filters')">Task</button>
+        <button onclick="showFilters('loading-time-filters')">Loading Time</button>
+        <button onclick="showFilters('task-delay-filters')">Task Delay</button>
+        <button onclick="showFilters('task-cycle-filters')">Task Cycle</button>
+        <!-- <button onclick="showFilters('battery-filters')">Battery Logs</button> -->
     </div>
+
+    <!-- Filter Containers -->
+
+    <!-- All Reports Filter -->
+    <!-- <div class="filter-container hidden" id="all-reports">
+        <div class="filter-group">
+            <label></label>
+            <div class="dropdown">
+                <button class="dropbtn">Select Errors</button>
+                <div class="dropdown-content">
+                    <div>
+                        <input type="checkbox" id="all-errors" name="errors" value="all-errors">
+                        <label for="all-errors">All Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="network-errors" name="errors" value="network-errors">
+                        <label for="network-errors">Network Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="start-stop-errors" name="errors" value="start-stop-errors">
+                        <label for="start-stop-errors">Start/Stop Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="navigation-errors" name="errors" value="navigation-errors">
+                        <label for="navigation-errors">Navigation Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="diagnostic-errors" name="errors" value="diagnostic-errors">
+                        <label for="diagnostic-errors">Diagnostic Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="motor-driver-errors" name="errors" value="motor-driver-errors">
+                        <label for="motor-driver-errors">Motor-Driver Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="saviour-errors" name="errors" value="saviour-errors">
+                        <label for="saviour-errors">Saviour Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="loading-unloading-errors" name="errors" value="loading-unloading-errors">
+                        <label for="loading-unloading-errors">Loading/Unloading Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="charger-errors" name="errors" value="charger-errors">
+                        <label for="charger-errors">Charger Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="estop-errors" name="errors" value="estop-errors">
+                        <label for="estop-errors">Estop Errors</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label></label>
+            <div class="dropdown">
+                <button class="dropbtn">Select Tasks</button>
+                <div class="dropdown-content">
+                    <div>
+                        <input type="checkbox" id="all-tasks" name="tasks" value="all-tasks">
+                        <label for="all-tasks">All Tasks</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="pick-tasks" name="tasks" value="pick-tasks">
+                        <label for="pick-tasks">Pick Tasks</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="drop-tasks" name="tasks" value="drop-tasks">
+                        <label for="drop-tasks">Drop Tasks</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="pick-to-drop-tasks" name="tasks" value="pick-to-drop-tasks">
+                        <label for="pick-to-drop-tasks">Pick to Drop Tasks</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="tasks-by-robot" name="tasks" value="tasks-by-robot">
+                        <label for="tasks-by-robot">Tasks by Each Robot</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label></label>
+            <div class="dropdown">
+                <button class="dropbtn">Select Delays</button>
+                <div class="dropdown-content">
+                    <div>
+                        <input type="checkbox" id="all-delays" name="delays" value="all-delays">
+                        <label for="all-delays">All</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="loading-delay" name="delays" value="loading-delay">
+                        <label for="loading-delay">Loading Delay</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="task-delay" name="delays" value="task-delay">
+                        <label for="task-delay">Task Delay</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="task-cycle" name="delays" value="task-cycle">
+                        <label for="task-cycle">Task Cycle</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label></label>
+            <div class="dropdown">
+                <button class="dropbtn">Select Plots</button>
+                <div class="dropdown-content">
+                    <div>
+                        <input type="checkbox" id="all-plots" name="plots" value="all-plots">
+                        <label for="all-plots">All</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="throughput-plots" name="plots" value="throughput-plots">
+                        <label for="throughput-plots">Throughput Plots</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label for="start-datetime">Start Date and Time:</label>
+            <input type="datetime-local" id="start-datetime" name="start-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="end-datetime">End Date and Time:</label>
+            <input type="datetime-local" id="end-datetime" name="end-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="input-folder">Input Folder:</label>
+            <input type="file" id="input-folder" name="input-folder" webkitdirectory directory multiple>
+        </div>
+        <button type="submit" class="submit-btn" onclick="submitAllReportsFilters()">Submit</button>
+    </div> -->
+
+    <div class="filter-container hidden" id="all-reports">
+        <div class="filter-group">
+            <label></label>
+            <div class="dropdown">
+                <button class="dropbtn">Select Errors</button>
+                <div class="dropdown-content">
+                    <div>
+                        <input type="checkbox" id="all-errors" name="errors" value="all-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="all-errors">All Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="network-errors" name="errors" value="network-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="network-errors">Network Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="start-stop-errors" name="errors" value="start-stop-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="start-stop-errors">Start/Stop Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="navigation-errors" name="errors" value="navigation-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="navigation-errors">Navigation Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="diagnostic-errors" name="errors" value="diagnostic-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="diagnostic-errors">Diagnostic Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="motor-driver-errors" name="errors" value="motor-driver-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="motor-driver-errors">Motor-Driver Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="saviour-errors" name="errors" value="saviour-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="saviour-errors">Saviour Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="loading-unloading-errors" name="errors" value="loading-unloading-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="loading-unloading-errors">Loading/Unloading Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="charger-errors" name="errors" value="charger-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="charger-errors">Charger Errors</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="estop-errors" name="errors" value="estop-errors" onchange="handleCheckboxChange('errors')">
+                        <label for="estop-errors">Estop Errors</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label></label>
+            <div class="dropdown">
+                <button class="dropbtn">Select Tasks</button>
+                <div class="dropdown-content">
+                    <div>
+                        <input type="checkbox" id="all-tasks" name="tasks" value="all-tasks" onchange="handleCheckboxChange('tasks')">
+                        <label for="all-tasks">All Tasks</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="pick-tasks" name="tasks" value="pick-tasks" onchange="handleCheckboxChange('tasks')">
+                        <label for="pick-tasks">Pick Tasks</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="drop-tasks" name="tasks" value="drop-tasks" onchange="handleCheckboxChange('tasks')">
+                        <label for="drop-tasks">Drop Tasks</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="pick-to-drop-tasks" name="tasks" value="pick-to-drop-tasks" onchange="handleCheckboxChange('tasks')">
+                        <label for="pick-to-drop-tasks">Pick to Drop Tasks</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="tasks-by-robot" name="tasks" value="tasks-by-robot" onchange="handleCheckboxChange('tasks')">
+                        <label for="tasks-by-robot">Tasks by Each Robot</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label></label>
+            <div class="dropdown">
+                <button class="dropbtn">Select Delays</button>
+                <div class="dropdown-content">
+                    <div>
+                        <input type="checkbox" id="all-delays" name="delays" value="all-delays" onchange="handleCheckboxChange('delays')">
+                        <label for="all-delays">All</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="loading-delay" name="delays" value="loading-delay" onchange="handleCheckboxChange('delays')">
+                        <label for="loading-delay">Loading Delay</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="task-delay" name="delays" value="task-delay" onchange="handleCheckboxChange('delays')">
+                        <label for="task-delay">Task Delay</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="task-cycle" name="delays" value="task-cycle" onchange="handleCheckboxChange('delays')">
+                        <label for="task-cycle">Task Cycle</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label></label>
+            <div class="dropdown">
+                <button class="dropbtn">Select Plots</button>
+                <div class="dropdown-content">
+                    <div>
+                        <input type="checkbox" id="all-plots" name="plots" value="all-plots" onchange="handleCheckboxChange('plots')">
+                        <label for="all-plots">All</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="throughput-plots" name="plots" value="throughput-plots" onchange="handleCheckboxChange('plots')">
+                        <label for="throughput-plots">Throughput Plots</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label for="start-datetime">Start Date and Time:</label>
+            <input type="datetime-local" id="start-datetime" name="start-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="end-datetime">End Date and Time:</label>
+            <input type="datetime-local" id="end-datetime" name="end-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="input-folder">Input Folder:</label>
+            <input type="file" id="input-folder" name="input-folder" webkitdirectory directory multiple>
+        </div>
+        <button type="submit" class="submit-btn" onclick="submitAllReportsFilters()">Submit</button>
+    </div>
+    
+    <!-- Throughput Filter -->
+    <div class="filter-container hidden" id="throughput-filters">
+        <div class="filter-group">
+            <label for="throughput-start-datetime">Start Date and Time:</label>
+            <input type="datetime-local" id="throughput-start-datetime" name="throughput-start-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="throughput-end-datetime">End Date and Time:</label>
+            <input type="datetime-local" id="throughput-end-datetime" name="throughput-end-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="throughput-json-file">Upload .json File:</label>
+            <input type="file" id="throughput-json-file" name="throughput-json-file" accept=".json">
+        </div>
+        <button type="submit" class="submit-btn" onclick="submitThroughputFilters()">Submit</button>
+    </div>
+
+    <!-- Start/Stop Fleet -->
+    <div class="filter-container hidden" id="fleet-filters">
+        <div class="filter-group">
+            <label for="fleet-start-datetime">Start Date and Time:</label>
+            <input type="datetime-local" id="fleet-start-datetime" name="fleet-start-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="fleet-end-datetime">End Date and Time:</label>
+            <input type="datetime-local" id="fleet-end-datetime" name="fleet-end-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="fleet-json-file">Upload .json File:</label>
+            <input type="file" id="fleet-json-file" name="fleet-json-file" accept=".json">
+        </div>
+        <button type="submit" class="submit-btn" onclick="submitFleetFilters()">Submit</button>
+    </div>
+
+    <!-- Error filter -->
+    <div class="filter-container hidden" id="error-filters">
+        <div class="filter-group">
+            <label for="robot-id">Robot ID:</label>
+            <select id="robot-id">
+                <option value="">All</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="error-type">Error Type:</label>
+            <select id="error-type" name="error-type">
+                <option value="all">All</option>
+                <!-- Your optgroup options here -->
+                <optgroup label="Navigation Errors">
+                    <option value="201">BARCODE NOT UPDATED</option>
+                    <option value="202">OUT OF PATH</option>
+                    <option value="203">GOAL OVERSHOOT</option>
+                    <option value="204">DELOCALIZED</option>
+                </optgroup>
+                <optgroup label="Diagnostic Errors">
+                    <option value="301">diagnosticsType[BARCODE_SENSOR]</option>
+                    <option value="302">diagnosticsType[BMS_DRIVER]</option>
+                    <option value="303">diagnosticsType[IMU_DATA]</option>
+                    <option value="304">diagnosticsType[SAFETY_SENSOR]</option>
+                </optgroup>
+                <optgroup label="Motor Driver Errors">
+                    <option value="901">hard_stop_robot_byMotorDriver_read_fail</option>
+                    <option value="902">motordriver_loopError</option>
+                    <option value="903">motordriver_underVoltage</option>
+                    <option value="904">motordriver_overVoltage</option>
+                    <option value="905">motordriver_overCurrent</option>
+                    <option value="906">motordriver_driveError</option>
+                </optgroup>
+                <optgroup label="Saviour Errors">
+                    <option value="1001">saviour_msgs.undervoltage_error</option>
+                    <option value="1002">saviour_msgs.control_flow_error</option>
+                    <option value="1003">saviour_msgs.config_resistor_error</option>
+                    <option value="1004">saviour_msgs.clock_error</option>
+                    <option value="1005">saviour_msgs.hal_error</option>
+                    <option value="1006">saviour_msgs.watchdog_reset_error</option>
+                    <option value="1007">saviour_msgs.STO_pin_error</option>
+                    <option value="1008">saviour_msgs.ble_comm_error</option>
+                    <option value="1009">saviour_msgs.up_squared_comm_error</option>
+                    <option value="1010">saviour_msgs.laser2_comm_error</option>
+                    <option value="1011">saviour_msgs.laser1_comm_error</option>
+                    <option value="1012">saviour_msgs.wifi_status</option>
+                    <option value="1013">saviour_msgs.cpu_test_fail</option>
+                    <option value="1014">saviour_msgs.RAM_test_fail</option>
+                    <option value="1015">saviour_msgs.stl_test_fail</option>
+                    <option value="1016">saviour_msgs.emergency_switch_failure</option>
+                    <option value="1017">saviour_msgs.STO</option>
+                    <option value="1018">saviour_msgs.ble_disable_driver</option>
+                    <option value="1019">saviour_msgs.ble_dead</option>
+                    <option value="1020">saviour_msgs.laser2_frame_error</option>
+                    <option value="1021">saviour_msgs.laser1_frame_error</option>
+                    <option value="1022">saviour_msgs.laser2_dead</option>
+                    <option value="1023">saviour_msgs.laser1_dead</option>
+                    <option value="1024">saviour_msgs.laser2_obstacle</option>
+                    <option value="1025">saviour_msgs.laser1_obstacle</option>
+                    <option value="1026">saviour_msgs.up_squared_enable</option>
+                </optgroup>
+                <optgroup label="Loading/Unloading Errors">
+                    <option value="401">LOADING_ERROR</option>
+                    <option value="402">UNLOADING_ERROR</option>
+                    <option value="403">BMS_DATA_NOT_UPDATING</option>
+                </optgroup>
+                <optgroup label="Charger Errors">
+                    <option value="500">EMERGENCY</option>
+                    <option value="501">AGENT_CHARGING/DOCKING_ERROR</option>
+                    <option value="502">CHARGER_NOT_WORKING</option>
+                </optgroup>
+                <optgroup label="Network Errors">
+                    <option value="601">ROBOT_IS_NOT_CONNECTED_IN_NETWORK</option>
+                </optgroup>
+                <optgroup label="Emergency Stop">
+                    <option value="701">ROBOTS_ESTOP</option>
+                </optgroup>
+                <optgroup label="Parcel Errors">
+                    <option value="801">PARCEL_FALL_WHILE_ROBOT_RUNNING</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="error-start-time">Start Time:</label>
+            <input type="datetime-local" id="error-start-time" name="error-start-time">
+        </div>
+        <div class="filter-group">
+            <label for="error-end-time">End Time:</label>
+            <input type="datetime-local" id="error-end-time" name="error-end-time">
+        </div>
+        <div class="filter-group">
+            <label for="json-file">Upload .json File:</label>
+            <input type="file" id="json-file" name="json-file" accept=".json">
+        </div>
+        <button type="button" class="submit-btn" onclick="filterAndPlotErrors()">Submit</button>
+    </div>
+
+    <!-- Network Error -->
+    <div class="filter-container hidden" id="network-filters">
+        <div class="filter-group">
+            <label for="network-start-date">Start Date:</label>
+            <input type="date" id="network-start-date" name="network-start-date">
+        </div>
+        <div class="filter-group">
+            <label for="network-end-date">End Date:</label>
+            <input type="date" id="network-end-date" name="network-end-date">
+        </div>
+        <div class="filter-group">
+            <label for="network-start-time">Start Time:</label>
+            <input type="time" id="network-start-time" name="network-start-time">
+        </div>
+        <div class="filter-group">
+            <label for="network-end-time">End Time:</label>
+            <input type="time" id="network-end-time" name="network-end-time">
+        </div>
+        <div class="filter-group">
+            <label for="network-robot-id">Robot ID:</label>
+            <select id="network-robot-id" name="network-robot-id" multiple>
+                <option value="all">Select All</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="network-json-file">Upload .json File:</label>
+            <input type="file" id="network-json-file" name="network-json-file" accept=".json">
+        </div>
+        <button type="submit" class="submit-btn" onclick="filterAndPlotNetwork()">Submit</button>
+    </div>
+
+    <!-- Task Filter -->
+    <div class="filter-container hidden" id="task-filters">
+        <div class="filter-group">
+            <label for="task-start-date">Start Date:</label>
+            <input type="date" id="task-start-date" name="task-start-date">
+        </div>
+        <div class="filter-group">
+            <label for="task-end-date">End Date:</label>
+            <input type="date" id="task-end-date" name="task-end-date">
+        </div>
+        <div class="filter-group">
+            <label for="task-start-time">Start Time:</label>
+            <input type="time" id="task-start-time" name="task-start-time">
+        </div>
+        <div class="filter-group">
+            <label for="task-end-time">End Time:</label>
+            <input type="time" id="task-end-time" name="task-end-time">
+        </div>
+        <div class="filter-group">
+            <label for="task-json-file">Upload .json File:</label>
+            <input type="file" id="task-json-file" name="task-json-file" accept=".json">
+        </div>
+        <button type="submit" class="submit-btn" onclick="plotTaskReport()">Submit</button>
+    </div>
+
+    <!-- Loading Time -->
+    <div class="filter-container hidden" id="loading-time-filters">
+        <div class="filter-group">
+            <label for="loading-start-datetime">Start Date and Time:</label>
+            <input type="datetime-local" id="loading-start-datetime" name="loading-start-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="loading-end-datetime">End Date and Time:</label>
+            <input type="datetime-local" id="loading-end-datetime" name="loading-end-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="loading-task-id">Task ID:</label>
+            <input type="text" id="loading-task-id" name="loading-task-id" placeholder="Enter Task ID (optional)">
+        </div>
+        <div class="filter-group">
+            <label for="loading-json-file">Upload .json File:</label>
+            <input type="file" id="loading-json-file" name="loading-json-file" accept=".json">
+        </div>
+        <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
+    </div>
+
+    <!-- Task Delay -->
+    <div class="filter-container hidden" id="task-delay-filters">
+        <div class="filter-group">
+            <label for="delay-start-datetime">Start Date and Time:</label>
+            <input type="datetime-local" id="delay-start-datetime" name="delay-start-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="delay-end-datetime">End Date and Time:</label>
+            <input type="datetime-local" id="delay-end-datetime" name="delay-end-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="delay-task-id">Task ID:</label>
+            <input type="text" id="delay-task-id" name="delay-task-id" placeholder="Enter Task ID (optional)">
+        </div>
+        <div class="filter-group">
+            <label for="delay-json-file">Upload .json File:</label>
+            <input type="file" id="delay-json-file" name="delay-json-file" accept=".json">
+        </div>
+        <button type="submit" class="submit-btn" onclick="processTaskDelayData()">Submit</button>
+    </div>
+
+    <!-- Task Cycle -->
+    <div class="filter-container hidden" id="task-cycle-filters">
+        <div class="filter-group">
+            <label for="cycle-start-datetime">Start Date and Time:</label>
+            <input type="datetime-local" id="cycle-start-datetime" name="cycle-start-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="cycle-end-datetime">End Date and Time:</label>
+            <input type="datetime-local" id="cycle-end-datetime" name="cycle-end-datetime">
+        </div>
+        <div class="filter-group">
+            <label for="cycle-task-id">Task ID:</label>
+            <input type="text" id="cycle-task-id" name="cycle-task-id" placeholder="Enter Task ID (optional)">
+        </div>
+        <div class="filter-group">
+            <label for="cycle-json-file">Upload .json File:</label>
+            <input type="file" id="cycle-json-file" name="cycle-json-file" accept=".json">
+        </div>
+        <button type="submit" class="submit-btn" onclick="processTaskCycleData()">Submit</button>
+    </div>
+
+    <div id="graph-container" class="graph-container"></div>
+
+
+    <script src="script.js"></script>
+
+
+
 </body>
 </html>
