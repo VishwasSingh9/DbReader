@@ -20,24 +20,40 @@ def allowed_file(filename):
 def index():
     return render_template('index.html')
 
-@app.route('/submit_all_reports_filters', methods=['POST'])
-def submit_all_reports_filters():
-    start_datetime = request.form.get('start-datetime')
-    end_datetime = request.form.get('end-datetime')
-    input_folder = request.files.getlist('input-folder')
+def categorize_json(json_data):
+    """Categorizes JSON file based on its structure."""
+    
+    if any("errorCount" in entry for entry in json_data):
+        return "error"
+    
+    elif any("throughput" in entry for entry in json_data):
+        return "throughput"
+    
+    elif any("taskId" in entry for entry in json_data):
+        return "task_delay"
+    
+    return "unknown"
 
-    # Check for input folder files
-    uploaded_files = []
-    for file in input_folder:
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            uploaded_files.append(file_path)
-
-    # Your logic to process filters and uploaded files
-
-    return jsonify({'status': 'success', 'message': 'Filters submitted successfully'})
+@app.route("/upload", methods=["POST"])
+def upload_files():
+    """Handles file uploads and categorizes JSON files."""
+    
+    if "files" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    uploaded_files = request.files.getlist("files")
+    categorized_data = {"error": [], "throughput": [], "task_delay": []}
+    
+    for file in uploaded_files:
+        if file.filename.endswith(".json"):
+            file_content = json.load(file)
+            category = categorize_json(file_content)
+            
+            if category in categorized_data:
+                categorized_data[category].extend(file_content)
+    
+    return jsonify({"message": "Files processed successfully", "data": categorized_data})
+   
 
 @app.route('/submit_throughput_filters', methods=['POST'])
 def submit_throughput_filters():
