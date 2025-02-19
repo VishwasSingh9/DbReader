@@ -1,17 +1,10 @@
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
+from flask import Flask, request, jsonify, render_template
 import os
-import datetime
-import pandas as pd
 import json
-import matplotlib.pyplot as plt
-import io
-import matplotlib
-matplotlib.use('Agg')
+import datetime
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)  # Allow all origins (for testing)
 
 # Set upload folder and allowed file extensions
 UPLOAD_FOLDER = 'uploads'
@@ -19,14 +12,13 @@ ALLOWED_EXTENSIONS = {'json'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
 # Check if file extension is allowed
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/submit_all_reports_filters', methods=['POST'])
 def submit_all_reports_filters():
@@ -90,144 +82,36 @@ def submit_error_filters():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         json_file.save(file_path)
 
-        with open(file_path, 'r') as f:
-            error_data = json.load(f)
+        # Process the error filters and JSON data here
 
-        df = pd.DataFrame(error_data)
-
-        # Convert timestamps if present
-        if 'lastModifiedDate' in df:
-            df['lastModifiedDate'] = pd.to_datetime(df['lastModifiedDate']['$date'])
-
-        # Filtering by user inputs
-        if robot_id:
-            df = df[df['robotId'] == int(robot_id)]
-        if error_type and error_type != "all":
-            df = df[df['errorCode'] == int(error_type)]
-        if start_time and end_time:
-            df = df[(df['lastModifiedDate'] >= start_time) & (df['lastModifiedDate'] <= end_time)]
-
-        # Plot 1: Errors by Error Code
-        plt.figure(figsize=(8, 6))
-        sns.countplot(x=df['errorCode'], palette='coolwarm')
-        plt.xlabel('Error Code')
-        plt.ylabel('Count')
-        plt.title('Error Frequency by Error Code')
-        plt.xticks(rotation=45)
-        plt.savefig('static/error_by_code.png')
-
-        # Plot 2: Errors by Robot ID
-        plt.figure(figsize=(8, 6))
-        sns.countplot(x=df['robotId'], palette='viridis')
-        plt.xlabel('Robot ID')
-        plt.ylabel('Count')
-        plt.title('Error Frequency by Robot ID')
-        plt.savefig('static/error_by_robot.png')
-
-        # Plot 3: Heatmap of Errors (Error Code vs Robot ID)
-        plt.figure(figsize=(8, 6))
-        heatmap_data = df.groupby(['robotId', 'errorCode']).size().unstack(fill_value=0)
-        sns.heatmap(heatmap_data, annot=True, cmap='coolwarm', fmt='d')
-        plt.xlabel('Error Code')
-        plt.ylabel('Robot ID')
-        plt.title('Error Distribution')
-        plt.savefig('static/error_heatmap.png')
-
-        # Plot 4: Error Position Scatter Plot
-        if 'errorPosition' in df.columns:
-            df[['x', 'y']] = df['errorPosition'].apply(lambda pos: pd.Series([pos.get('x', None), pos.get('y', None)]))
-            plt.figure(figsize=(8, 6))
-            sns.scatterplot(x=df['x'], y=df['y'], hue=df['errorCode'], palette='tab10', alpha=0.7)
-            plt.xlabel('X Position')
-            plt.ylabel('Y Position')
-            plt.title('Error Location Scatter Plot')
-            plt.savefig('static/error_position.png')
-
-        return jsonify({'status': 'success', 'message': 'Error filters applied', 'plots': [
-            'static/error_by_code.png',
-            'static/error_by_robot.png',
-            'static/error_heatmap.png',
-            'static/error_position.png'
-        ]})
-
-    return jsonify({'status': 'error', 'message': 'Invalid file or input'})
+    return jsonify({'status': 'success', 'message': 'Error filters submitted successfully'})
 
 @app.route("/submit_task_filters", methods=["POST"])
 def submit_task_filters():
+    start_date = request.form.get("task-start-date")
+    end_date = request.form.get("task-end-date")
+    start_time = request.form.get("task-start-time") or "00:00"
+    end_time = request.form.get("task-end-time") or "23:59"
+    json_file = request.files.get("task-json-file")
+
+    if not json_file or not allowed_file(json_file.filename):
+        return jsonify({"status": "error", "message": "Invalid file format."}), 400
+
+    filename = secure_filename(json_file.filename)
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    json_file.save(file_path)
+
     try:
-        # Get form data
-        start_date = request.form.get("task-start-date")
-        end_date = request.form.get("task-end-date")
-        start_time = request.form.get("task-start-time")
-        end_time = request.form.get("task-end-time")
-        json_file = request.files.get("task-json-file")
-
-        # Validate inputs
-        if not json_file or not allowed_file(json_file.filename):
-            return jsonify({"status": "error", "message": "Invalid file format. Upload a JSON file."}), 400
-
-        # Secure and save file
-        filename = secure_filename(json_file.filename)
-        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        json_file.save(file_path)
-
-        # Convert start and end datetime
-        try:
-            start_datetime = datetime.datetime.strptime(f"{start_date} {start_time}", "%Y-%m-%d %H:%M")
-            end_datetime = datetime.datetime.strptime(f"{end_date} {end_time}", "%Y-%m-%d %H:%M")
-        except ValueError:
-            return jsonify({"status": "error", "message": "Invalid date format. Use YYYY-MM-DD HH:MM."}), 400
-
-        # Read JSON file
-        data = pd.read_json(file_path)
-
-        # Check if required columns exist
-        required_columns = {"PickTime", "sourceLocation", "destinationLocation", "robotId"}
-        if not required_columns.issubset(data.columns):
-            return jsonify({"status": "error", "message": "Missing required columns in JSON file."}), 400
-
-        # Fix PickTime format and convert to datetime
-        data["PickTime"] = data["PickTime"].str.replace(r"(\d{4}):(\d{2}):(\d{2})", r"\1-\2-\3", regex=True)
-        data["PickTime"] = pd.to_datetime(data["PickTime"], format="%Y-%m-%d %H:%M:%S.%f", errors="coerce")
-        data.dropna(subset=["PickTime"], inplace=True)
-
-        # Filter data
-        df_filtered = data[(data["PickTime"] >= start_datetime) & (data["PickTime"] <= end_datetime)]
-        if df_filtered.empty:
-            return jsonify({"status": "error", "message": "No matching data found for the selected filters."}), 404
-
-        # Generate plots
-        fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-
-        # Source Tasks
-        df_filtered["sourceLocation"].value_counts().plot(kind="bar", ax=axes[0, 0], color="blue", alpha=0.7)
-        axes[0, 0].set_title("Source Tasks")
-
-        # Destination Tasks
-        df_filtered["destinationLocation"].value_counts().plot(kind="bar", ax=axes[0, 1], color="red", alpha=0.7)
-        axes[0, 1].set_title("Destination Tasks")
-
-        # Source to Destination
-        df_filtered.groupby(["sourceLocation", "destinationLocation"]).size().unstack().plot(
-            kind="bar", stacked=True, ax=axes[1, 0], colormap="viridis"
-        )
-        axes[1, 0].set_title("Source to Destination Tasks")
-
-        # Robot Tasks
-        df_filtered["robotId"].value_counts().plot(kind="bar", ax=axes[1, 1], color="green", alpha=0.7)
-        axes[1, 1].set_title("Tasks by Robot ID")
-
-        plt.tight_layout()
-
-        # Convert plot to image and return as response
-        img_io = io.BytesIO()
-        plt.savefig(img_io, format="png")
-        img_io.seek(0)
-        plt.close()  # Prevents memory leaks
-        return send_file(img_io, mimetype="image/png")
-
+        with open(file_path, "r") as f:
+            task_data = json.load(f)
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": f"Error reading JSON: {str(e)}"}), 500
+
+    # Apply filtering logic before returning data
+    filtered_tasks = [task for task in task_data if start_date <= task["timestamp"]["$date"][:10] <= end_date]
+    
+    return jsonify({"status": "success", "filtered_tasks": filtered_tasks})
 
 @app.route('/submit_loading_time_filters', methods=['POST'])
 def submit_loading_time_filters():
@@ -404,7 +288,6 @@ def submit_task_cycle_filters():
     img_io.seek(0)
 
     return send_file(img_io, mimetype='image/png')
-
 
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
