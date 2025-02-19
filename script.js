@@ -952,293 +952,449 @@ function renderTaskCycleChart(labels, cycleDifferences) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// document.addEventListener('DOMContentLoaded', function () {
-//     const inputFolder = document.getElementById('input-folder');
-//     inputFolder.addEventListener('change', handleFolderInput);
 
-//     const allTasksCheckbox = document.getElementById('all-tasks');
-//     const taskCheckboxes = document.querySelectorAll('input[name="tasks"]');
-//     allTasksCheckbox.addEventListener('change', function () {
-//         taskCheckboxes.forEach(checkbox => {
-//             if (checkbox !== allTasksCheckbox) {
-//                 checkbox.checked = allTasksCheckbox.checked;
-//             }
-//         });
-//     });
-//     taskCheckboxes.forEach(checkbox => {
-//         checkbox.addEventListener('change', function () {
-//             if (!checkbox.checked) {
-//                 allTasksCheckbox.checked = false;
-//             } else {
-//                 allTasksCheckbox.checked = Array.from(taskCheckboxes).every(cb => cb.checked);
-//             }
-//         });
-//     });
-
-//     const allErrorsCheckbox = document.getElementById('all-errors');
-//     const errorCheckboxes = document.querySelectorAll('input[name="errors"]');
-//     allErrorsCheckbox.addEventListener('change', function () {
-//         errorCheckboxes.forEach(checkbox => {
-//             if (checkbox !== allErrorsCheckbox) {
-//                 checkbox.checked = allErrorsCheckbox.checked;
-//             }
-//         });
-//     });
-//     errorCheckboxes.forEach(checkbox => {
-//         checkbox.addEventListener('change', function () {
-//             if (!checkbox.checked) {
-//                 allErrorsCheckbox.checked = false;
-//             } else {
-//                 allErrorsCheckbox.checked = Array.from(errorCheckboxes).every(cb => cb.checked);
-//             }
-//         });
-//     });
-
-//     const allDelaysCheckbox = document.getElementById('all-delays');
-//     const delayCheckboxes = document.querySelectorAll('input[name="delays"]');
-//     allDelaysCheckbox.addEventListener('change', function () {
-//         delayCheckboxes.forEach(checkbox => {
-//             if (checkbox !== allDelaysCheckbox) {
-//                 checkbox.checked = allDelaysCheckbox.checked;
-//             }
-//         });
-//     });
-//     delayCheckboxes.forEach(checkbox => {
-//         checkbox.addEventListener('change', function () {
-//             if (!checkbox.checked) {
-//                 allDelaysCheckbox.checked = false;
-//             } else {
-//                 allDelaysCheckbox.checked = Array.from(delayCheckboxes).every(cb => cb.checked);
-//             }
-//         });
-//     });
-
-//     const allPlotsCheckbox = document.getElementById('all-plots');
-//     const plotCheckboxes = document.querySelectorAll('input[name="plots"]');
-//     allPlotsCheckbox.addEventListener('change', function () {
-//         plotCheckboxes.forEach(checkbox => {
-//             if (checkbox !== allPlotsCheckbox) {
-//                 checkbox.checked = allPlotsCheckbox.checked;
-//             }
-//         });
-//     });
-//     plotCheckboxes.forEach(checkbox => {
-//         checkbox.addEventListener('change', function () {
-//             if (!checkbox.checked) {
-//                 allPlotsCheckbox.checked = false;
-//             } else {
-//                 allPlotsCheckbox.checked = Array.from(plotCheckboxes).every(cb => cb.checked);
-//             }
-//         });
-//     });
+// document.addEventListener("DOMContentLoaded", function () {
+//     document.getElementById("plot-popup").style.display = "none"; // Hide popup initially
 // });
 
-// async function submitAllReportsFilters() {
-//     const inputFolder = document.getElementById('input-folder').files;
-//     const errorCheckboxes = document.querySelectorAll('input[name="errors"]:checked');
-//     const taskCheckboxes = document.querySelectorAll('input[name="tasks"]:checked');
-//     const delayCheckboxes = document.querySelectorAll('input[name="delays"]:checked');
-//     const plotCheckboxes = document.querySelectorAll('input[name="plots"]:checked');
-//     const startDateTime = document.getElementById('start-datetime').value;
-//     const endDateTime = document.getElementById('end-datetime').value;
-//     const jsonFile = document.getElementById('json-file').files[0];
+// function validateAndShowPopup() {
+//     const startDate = document.getElementById("start-datetime").value;
+//     const endDate = document.getElementById("end-datetime").value;
+//     const inputFolder = document.getElementById("input-folder").files;
 
-//     const selectedErrors = Array.from(errorCheckboxes).map(cb => cb.value);
-//     const selectedTasks = Array.from(taskCheckboxes).map(cb => cb.value);
-//     const selectedDelays = Array.from(delayCheckboxes).map(cb => cb.value);
-//     const selectedPlots = Array.from(plotCheckboxes).map(cb => cb.value);
-
-//     console.log('Input Folder:', inputFolder);
-//     console.log('Selected Errors:', selectedErrors);
-//     console.log('Selected Tasks:', selectedTasks);
-//     console.log('Selected Delays:', selectedDelays);
-//     console.log('Selected Plots:', selectedPlots);
-//     console.log('Start Date and Time:', startDateTime);
-//     console.log('End Date and Time:', endDateTime);
-//     console.log('JSON File:', jsonFile);
-
-//     // Process the selected filters and data as needed
-//     if (selectedPlots.includes('all-plots') || selectedPlots.includes('throughput-plots')) {
-//         await submitThroughputFilters();
+//     if (!startDate || !endDate) {
+//         alert("Please select both Start and End Date-Time.");
+//         return;
 //     }
-
-//     if (selectedTasks.includes('all-tasks') || selectedTasks.includes('pick-tasks') || selectedTasks.includes('drop-tasks') || selectedTasks.includes('pick-to-drop-tasks') || selectedTasks.includes('tasks-by-robot')) {
-//         plotTaskReport();
-//     }
-
-//     if (selectedErrors.includes('all-errors') || selectedErrors.includes('network-errors') || selectedErrors.includes('start-stop-errors') || selectedErrors.includes('navigation-errors') || selectedErrors.includes('diagnostic-errors') || selectedErrors.includes('motor-driver-errors') || selectedErrors.includes('saviour-errors') || selectedErrors.includes('loading-unloading-errors') || selectedErrors.includes('charger-errors') || selectedErrors.includes('estop-errors')) {
-//         filterAndPlotErrors();
-//     }
-
-//     if (selectedDelays.includes('all-delays') || selectedDelays.includes('loading-delay') || selectedDelays.includes('task-delay') || selectedDelays.includes('task-cycle')) {
-//         processTaskDelayData();
-//     }
-// }
-
-// async function submitThroughputFilters() {
-//     const startDateTime = document.getElementById("start-datetime").value;
-//     const endDateTime = document.getElementById("end-datetime").value;
-//     const fileInput = document.getElementById("json-file");
-
-//     if (!fileInput.files.length) {
-//         alert("Please upload a .json file.");
+//     if (inputFolder.length === 0) {
+//         alert("Please select a folder containing JSON files.");
 //         return;
 //     }
 
-//     const file = fileInput.files[0];
-//     const fileContent = await file.text();
-//     const jsonData = JSON.parse(fileContent);
-//     const startDate = new Date(startDateTime);
-//     const endDate = new Date(endDateTime);
+//     document.getElementById("plot-popup").style.display = "block"; // Show popup
+// }
 
-//     const filteredData = jsonData.filter(entry => {
-//         const entryDateTime = new Date(entry.timestamp); // Assuming the JSON has a timestamp field
-//         return entryDateTime >= startDate && entryDateTime <= endDate;
+// function selectAllPlots(checkbox) {
+//     const checkboxes = document.querySelectorAll("#plot-popup input[type=checkbox]");
+//     checkboxes.forEach((cb) => {
+//         if (cb !== checkbox) {
+//             cb.checked = checkbox.checked;
+//         }
+//     });
+// }
+
+// function submitForm() {
+//     const selectedPlots = [];
+//     document.querySelectorAll("#plot-popup input[name='plots']:checked").forEach((cb) => {
+//         selectedPlots.push(cb.value);
 //     });
 
-//     if (filteredData.length === 0) {
-//         alert("No data found for the selected date and time range.");
+//     if (selectedPlots.length === 0) {
+//         alert("Please select at least one plot type.");
 //         return;
 //     }
 
-//     const timestamps = filteredData.map(entry => new Date(entry.timestamp));
-//     const throughputValues = filteredData.map(entry => entry.throughput);
+//     document.getElementById("plot-popup").style.display = "none"; // Hide popup
 
-//     // Plot graph using Plotly
-//     const trace = {
-//         x: timestamps,
-//         y: throughputValues,
-//         type: "scatter",
-//         mode: "lines+markers",
-//         marker: { color: "green" },
-//         name: "Throughput"
-//     };
-
-//     const layout = {
-//         title: "Throughput Logs Over Time",
-//         xaxis: { title: "Timestamp" },
-//         yaxis: { title: "Throughput" }
-//     };
-
-//     Plotly.newPlot("graph-container", [trace], layout);
+//     processJSONFiles(selectedPlots);
 // }
 
-// function handleFolderInput(event) {
-//     const files = event.target.files;
-//     const throughputFiles = [];
-//     const agentErrorFiles = [];
-//     const fmsTaskFiles = [];
+// function processJSONFiles(selectedPlots) {
+//     const files = document.getElementById("input-folder").files;
+//     const throughputData = [];
 
-//     for (const file of files) {
-//         if (file.name.includes('throughputData') && file.name.endsWith('.json')) {
-//             throughputFiles.push(file);
-//         } else if (file.name.includes('agentErrors') && file.name.endsWith('.json')) {
-//             agentErrorFiles.push(file);
-//         } else if (file.name.includes('fmsTask') && file.name.endsWith('.json')) {
-//             fmsTaskFiles.push(file);
+//     let fileReadPromises = [];
+
+//     for (let file of files) {
+//         if (file.name.endsWith(".json")) {
+//             let reader = new FileReader();
+//             let promise = new Promise((resolve) => {
+//                 reader.onload = function (event) {
+//                     try {
+//                         let jsonData = JSON.parse(event.target.result);
+//                         if (jsonData.some(entry => entry.throughput !== undefined)) {
+//                             throughputData.push(...jsonData.filter(entry => entry.throughput !== undefined));
+//                         }
+//                     } catch (e) {
+//                         console.error("Error parsing JSON:", e);
+//                     }
+//                     resolve();
+//                 };
+//                 reader.readAsText(file);
+//             });
+//             fileReadPromises.push(promise);
 //         }
 //     }
 
-//     console.log('Throughput Files:', throughputFiles);
-//     console.log('Agent Error Files:', agentErrorFiles);
-//     console.log('FMS Task Files:', fmsTaskFiles);
+//     Promise.all(fileReadPromises).then(() => {
+//         console.log("Throughput Data Extracted:", throughputData);
 
-//     // Process the files as needed
-//     processFiles(throughputFiles, agentErrorFiles, fmsTaskFiles);
-// }
-
-// function processFiles(throughputFiles, agentErrorFiles, fmsTaskFiles) {
-//     const startDateTime = new Date(document.getElementById('start-datetime').value);
-//     const endDateTime = new Date(document.getElementById('end-datetime').value);
-
-//     // Example processing function for throughput files
-//     throughputFiles.forEach(file => {
-//         const reader = new FileReader();
-//         reader.onload = function (event) {
-//             const jsonData = JSON.parse(event.target.result);
-//             const filteredData = jsonData.filter(entry => {
-//                 const entryDateTime = new Date(entry.timestamp); // Assuming the JSON has a timestamp field
-//                 return entryDateTime >= startDateTime && entryDateTime <= endDateTime;
-//             });
-//             console.log('Filtered Throughput Data:', filteredData);
-//             plotThroughputData(filteredData);
-//         };
-//         reader.readAsText(file);
-//     });
-
-//     // Example processing function for agent error files
-//     agentErrorFiles.forEach(file => {
-//         const reader = new FileReader();
-//         reader.onload = function (event) {
-//             const jsonData = JSON.parse(event.target.result);
-//             const filteredData = jsonData.filter(entry => {
-//                 const entryDateTime = new Date(entry.timestamp); // Assuming the JSON has a timestamp field
-//                 return entryDateTime >= startDateTime && entryDateTime <= endDateTime;
-//             });
-//             console.log('Filtered Agent Errors:', filteredData);
-//             // Process filtered agent error data as needed
-//         };
-//         reader.readAsText(file);
-//     });
-
-//     // Example processing function for FMS task files
-//     fmsTaskFiles.forEach(file => {
-//         const reader = new FileReader();
-//         reader.onload = function (event) {
-//             const jsonData = JSON.parse(event.target.result);
-//             const filteredData = jsonData.filter(entry => {
-//                 const entryDateTime = new Date(entry.timestamp); // Assuming the JSON has a timestamp field
-//                 return entryDateTime >= startDateTime && entryDateTime <= endDateTime;
-//             });
-//             console.log('Filtered FMS Task Data:', filteredData);
-//             // Process filtered FMS task data as needed
-//         };
-//         reader.readAsText(file);
+//         if (selectedPlots.includes("throughput-plots")) {
+//             plotThroughput(throughputData);
+//         }
 //     });
 // }
 
-// function plotThroughputData(data) {
-//     const timestamps = data.map(entry => new Date(entry.timestamp));
-//     const throughputValues = data.map(entry => entry.throughput);
-
-//     const trace = {
-//         x: timestamps,
-//         y: throughputValues,
-//         type: 'scatter',
-//         mode: 'lines+markers',
-//         marker: { color: 'green' },
-//         name: 'Throughput'
-//     };
-
-//     const layout = {
-//         title: 'Throughput Over Time',
-//         xaxis: { title: 'Timestamp' },
-//         yaxis: { title: 'Throughput' }
-//     };
-
-//     const graphContainer = document.getElementById('graph-container');
-//     graphContainer.innerHTML = ''; // Clear previous chart
-//     Plotly.newPlot(graphContainer, [trace], layout);
-// }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// function handleCheckboxChange(type) {
-//     const checkboxes = document.querySelectorAll(`input[name="${type}"]:checked`);
-//     const selectedValues = Array.from(checkboxes).map(cb => cb.value);
-//     console.log(`Selected ${type}:`, selectedValues);
-
-//     // Call the corresponding function based on the selected checkboxes
-//     if (type === 'errors') {
-//         filterAndPlotErrors();
-//     } else if (type === 'tasks') {
-//         plotTaskReport();
-//     } else if (type === 'delays') {
-//         processTaskDelayData();
-//     } else if (type === 'plots') {
-//         submitThroughputFilters();
+// function plotThroughput(throughputData) {
+//     if (throughputData.length === 0) {
+//         alert("No throughput data found in the selected files.");
+//         return;
 //     }
+
+//     // Extract timestamps and throughput values
+//     let timestamps = [];
+//     let throughputs = [];
+
+//     throughputData.forEach(entry => {
+//         let time = new Date(entry.lastModifiedDate?.$date || entry.lastModifiedDate).toLocaleString();
+//         timestamps.push(time);
+//         throughputs.push(entry.throughput);
+//     });
+
+//     // Sort data by timestamp
+//     let sortedData = timestamps.map((time, index) => ({ time, throughput: throughputs[index] }))
+//         .sort((a, b) => new Date(a.time) - new Date(b.time));
+
+//     timestamps = sortedData.map(d => d.time);
+//     throughputs = sortedData.map(d => d.throughput);
+
+//     // Create Plotly Trace
+//     let trace = {
+//         x: timestamps,
+//         y: throughputs,
+//         mode: "lines+markers",
+//         type: "scatter",
+//         marker: { color: "blue", size: 6 },
+//         line: { width: 2 }
+//     };
+
+//     let layout = {
+//         title: "Throughput Over Time",
+//         xaxis: { title: "Time", type: "category", tickangle: -45 },
+//         yaxis: { title: "Throughput", zeroline: true },
+//         hovermode: "closest",
+//         dragmode: "pan", // Enables panning
+//     };
+
+//     let config = {
+//         responsive: true,
+//         scrollZoom: true // Enables zoom with mouse scroll
+//     };
+
+//     // Plot the graph in #graph-container
+//     Plotly.newPlot("graph-container", [trace], layout, config);
+
+//     console.log("Throughput Chart Plotted Successfully with Zoom & Pan!");
 // }
 
+// // Function to plot error data using Plotly
+// function plotErrorData(errorData) {
+//     if (errorData.length === 0) {
+//         alert("No error data found.");
+//         return;
+//     }
+
+//     let errorCounts = {};
+
+//     errorData.forEach(entry => {
+//         let errorCode = entry.errorCode;
+//         if (errorCounts[errorCode]) {
+//             errorCounts[errorCode]++;
+//         } else {
+//             errorCounts[errorCode] = 1;
+//         }
+//     });
+
+//     let errorCodes = Object.keys(errorCounts).map(code => parseInt(code));
+//     let errorFrequencies = Object.values(errorCounts);
+
+//     let sortedData = errorCodes.map((code, index) => ({
+//         code, count: errorFrequencies[index]
+//     })).sort((a, b) => a.code - b.code);
+
+//     errorCodes = sortedData.map(d => d.code);
+//     errorFrequencies = sortedData.map(d => d.count);
+
+//     let trace = {
+//         x: errorCodes,
+//         y: errorFrequencies,
+//         type: "bar",
+//         marker: { color: "red" },
+//         text: errorFrequencies.map(String),
+//         textposition: "auto"
+//     };
+
+//     let layout = {
+//         title: "Error Code Frequency",
+//         xaxis: { title: "Error Code", tickmode: "linear" },
+//         yaxis: { title: "Count" },
+//         hovermode: "closest",
+//         dragmode: "pan"
+//     };
+
+//     let config = {
+//         responsive: true,
+//         scrollZoom: true
+//     };
+
+//     Plotly.newPlot("graph-container", [trace], layout, config);
+//     console.log("Error plot generated successfully!");
+// }
+///////////////////
+//////////
+///////////////////
+
+document.getElementById("report-form").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent default form submission
+    validateAndShowPopup();
+});
+
+function validateAndShowPopup() {
+    let inputFolder = document.getElementById("input-folder").files;
+    
+    if (inputFolder.length === 0) {
+        alert("Please select a folder containing JSON files.");
+        return;
+    }
+
+    document.getElementById("plot-popup").style.display = "block";
+}
+
+// Handles the plot selection and processes files
+function submitForm() {
+    let selectedPlots = [...document.querySelectorAll("input[name='plots']:checked")].map(input => input.value);
+    document.getElementById("plot-popup").style.display = "none"; // Hide popup
+
+    let inputFolder = document.getElementById("input-folder").files;
+    let files = Array.from(inputFolder);
+
+    let errorData = [];
+    let throughputData = [];
+    let taskData = [];
+    let delayData = [];
+
+    let fileReadPromises = files.map(file => {
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    let jsonData = JSON.parse(event.target.result);
+
+                    if (jsonData.some(entry => entry.hasOwnProperty("errorCode") && entry.hasOwnProperty("errorCount"))) {
+                        errorData.push(...jsonData);
+                    }
+
+                    if (jsonData.some(entry => entry.hasOwnProperty("throughput") && entry.hasOwnProperty("lastModifiedDate"))) {
+                        throughputData.push(...jsonData);
+                    }
+
+                    if (jsonData.some(entry => entry.hasOwnProperty("taskCompleted") && entry.hasOwnProperty("taskFailed"))) {
+                        taskData.push(...jsonData);
+                    }
+
+                    if (jsonData.some(entry => entry.hasOwnProperty("totalTaskWaitingTime") && entry.hasOwnProperty("taskCancelled"))) {
+                        delayData.push(...jsonData);
+                    }
+
+                    resolve();
+                } catch (error) {
+                    console.error("Error parsing JSON:", error);
+                    reject(error);
+                }
+            };
+            reader.onerror = reject;
+            reader.readAsText(file);
+        });
+    });
+
+    // After all files are read, process selected plots
+    Promise.all(fileReadPromises).then(() => {
+        document.getElementById("graph-container").innerHTML = ""; // Clear previous plots
+
+        if (selectedPlots.includes("error-plots")) {
+            createGraphContainer("error-plot", "Error Plot");
+            plotErrorGraph(errorData, "error-plot");
+        }
+
+        if (selectedPlots.includes("throughput-plots")) {
+            createGraphContainer("throughput-plot", "Throughput Plot");
+            plotThroughputGraph(throughputData, "throughput-plot");
+        }
+
+        if (selectedPlots.includes("task-plots")) {
+            createGraphContainer("task-plot", "Task Plot");
+            plotTaskGraph(taskData, "task-plot");
+        }
+
+        if (selectedPlots.includes("delay-plots")) {
+            createGraphContainer("delay-plot", "Delay Plot");
+            plotDelayGraph(delayData, "delay-plot");
+        }
+
+    }).catch(error => {
+        console.error("Error reading files:", error);
+    });
+}
+
+// Function to create a separate div for each plot
+function createGraphContainer(id, title) {
+    let graphContainer = document.getElementById("graph-container");
+    let div = document.createElement("div");
+    div.id = id;
+    div.style.marginBottom = "30px";
+
+    let heading = document.createElement("h3");
+    heading.innerText = title;
+    heading.style.textAlign = "center";
+
+    graphContainer.appendChild(heading);
+    graphContainer.appendChild(div);
+}
+
+// Function to plot Error Graph
+function plotErrorGraph(errorData, divId) {
+    if (!errorData || errorData.length === 0) {
+        console.log("No error data available.");
+        return;
+    }
+
+    let errorCounts = {};
+
+    // Count occurrences of each errorCode
+    errorData.forEach(entry => {
+        if (entry.hasOwnProperty("errorCode")) {
+            let errorCode = String(entry.errorCode); // Keep as a string to avoid sorting issues
+            errorCounts[errorCode] = (errorCounts[errorCode] || 0) + 1;
+        }
+    });
+
+    // Convert to sorted array (only present error codes)
+    let sortedData = Object.entries(errorCounts)
+        .map(([code, count]) => ({ code, count })) // Keep code as string to match labels correctly
+        .filter(d => d.count > 0) // Ensure only error codes that occurred are plotted
+        .sort((a, b) => parseInt(a.code) - parseInt(b.code)); // Sort numerically
+
+    // If no valid error codes, do nothing
+    if (sortedData.length === 0) {
+        console.log("No valid error codes with count > 0 found.");
+        return;
+    }
+
+    let trace = {
+        x: sortedData.map(d => `Error ${d.code}`), // Prefix for clarity
+        y: sortedData.map(d => d.count),
+        type: "bar",
+        name: "Error Counts",
+        marker: { color: "red" },
+        text: sortedData.map(d => d.count), // Show count on bars
+        textposition: "auto"
+    };
+
+    let layout = {
+        title: "Error Codes vs Frequency",
+        xaxis: { title: "Error Code", tickmode: "linear" },
+        yaxis: { title: "Count" },
+        hovermode: "closest",
+        dragmode: "pan"
+    };
+
+    Plotly.newPlot(divId, [trace], layout, { scrollZoom: true });
+}
+
+// Function to plot Throughput Graph
+function plotThroughputGraph(throughputData, divId) {
+    if (throughputData.length === 0) return;
+
+    let timestamps = [];
+    let throughputValues = [];
+
+    throughputData.forEach(entry => {
+        if (entry.lastModifiedDate && entry.throughput) {
+            timestamps.push(new Date(entry.lastModifiedDate.$date));
+            throughputValues.push(entry.throughput);
+        }
+    });
+
+    let trace = {
+        x: timestamps,
+        y: throughputValues,
+        type: "scatter",
+        mode: "lines+markers",
+        name: "Throughput Over Time",
+        line: { color: "blue" }
+    };
+
+    let layout = {
+        title: "Throughput Over Time",
+        xaxis: { title: "Time" },
+        yaxis: { title: "Throughput" },
+        hovermode: "closest",
+        dragmode: "pan"
+    };
+
+    Plotly.newPlot(divId, [trace], layout, { scrollZoom: true });
+}
+
+// Function to plot Task Graph
+// function plotTaskGraph(taskData, divId) {
+//     if (taskData.length === 0) return;
+
+//     let completedTasks = taskData.map(entry => entry.taskCompleted || 0);
+//     let failedTasks = taskData.map(entry => entry.taskFailed || 0);
+//     let timestamps = taskData.map(entry => new Date(entry.lastModifiedDate.$date));
+
+//     let trace1 = {
+//         x: timestamps,
+//         y: completedTasks,
+//         type: "scatter",
+//         mode: "lines+markers",
+//         name: "Completed Tasks",
+//         line: { color: "green" }
+//     };
+
+//     let trace2 = {
+//         x: timestamps,
+//         y: failedTasks,
+//         type: "scatter",
+//         mode: "lines+markers",
+//         name: "Failed Tasks",
+//         line: { color: "red" }
+//     };
+
+//     let layout = {
+//         title: "Task Performance Over Time",
+//         xaxis: { title: "Time" },
+//         yaxis: { title: "Task Count" },
+//         hovermode: "closest",
+//         dragmode: "pan"
+//     };
+
+//     Plotly.newPlot(divId, [trace1, trace2], layout, { scrollZoom: true });
+// }
+
+// Function to plot Delay Graph
+function plotDelayGraph(delayData, divId) {
+    if (delayData.length === 0) return;
+
+    let timestamps = delayData.map(entry => new Date(entry.lastModifiedDate.$date));
+    let waitingTimes = delayData.map(entry => entry.totalTaskWaitingTime || 0);
+
+    let trace = {
+        x: timestamps,
+        y: waitingTimes,
+        type: "scatter",
+        mode: "lines+markers",
+        name: "Total Task Waiting Time",
+        line: { color: "orange" }
+    };
+
+    let layout = {
+        title: "Task Delay Over Time",
+        xaxis: { title: "Time" },
+        yaxis: { title: "Waiting Time" },
+        hovermode: "closest",
+        dragmode: "pan"
+    };
+
+    Plotly.newPlot(divId, [trace], layout, { scrollZoom: true });
+}
