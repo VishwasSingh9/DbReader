@@ -406,8 +406,6 @@ function plotNetworkGraphs(disconnectionCounts) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Tasks Plots Implementations
-
 // Global task data
 let taskData = [];
 
@@ -415,211 +413,129 @@ let taskData = [];
 function createBarChart(title, data, containerId) {
     const graphContainer = document.getElementById("graph-container");
 
-    // Check if the graph container exists
     if (!graphContainer) {
-        console.error("Graph container element not found in the DOM.");
+        console.error("Graph container not found.");
         return;
     }
 
-    // Check if the data is valid
     if (!data || Object.keys(data).length === 0) {
-        console.warn(`Invalid or empty data provided for chart: ${title}`);
+        console.warn(`No data for chart: ${title}`);
         return;
     }
 
     const labels = Object.keys(data);
     const counts = Object.values(data);
 
-    // Debug: Log chart data
     console.log(`Chart Data for ${title}:`, { labels, counts });
+
+    // Remove existing chart div if present
+    let existingChart = document.getElementById(containerId);
+    if (existingChart) existingChart.remove();
 
     // Create a new div for the chart
     const chartDiv = document.createElement("div");
     chartDiv.style.width = "100%";
     chartDiv.style.height = "400px";
     chartDiv.id = containerId;
-
-    // Log the chart div being created
-    console.log(`Creating chart div with ID: ${containerId}`);
-
-    // Append the chart div to the graph container
     graphContainer.appendChild(chartDiv);
 
-    // Ensure the chart is rendering
-    console.log("Rendering chart for", title);
-    Plotly.newPlot(
-        chartDiv,
-        [
-            {
-                x: labels,
-                y: counts,
-                type: "bar",
-                text: counts.map(String), // Show the count value on the bars
-                textposition: "auto", // Automatically position the text inside the bars
-                marker: { color: "rgba(55, 128, 191, 0.7)" },
-            },
-        ],
-        {
-            title: title,
-            xaxis: { title: "Category", tickangle: -45 },
-            yaxis: { title: "Task Count" },
-            margin: { t: 50, r: 50, b: 150, l: 50 }, // Margin to avoid label overlap
-        }
-    ).then(() => {
-        console.log(`Chart rendered successfully: ${title}`);
+    Plotly.newPlot(chartDiv, [{
+        x: labels,
+        y: counts,
+        type: "bar",
+        text: counts.map(String),
+        textposition: "auto",
+        marker: { color: "rgba(55, 128, 191, 0.7)" }
+    }], {
+        title: title,
+        xaxis: { title: "Category", tickangle: -45 },
+        yaxis: { title: "Task Count" },
+        margin: { t: 50, r: 50, b: 150, l: 50 }
+    }).then(() => {
+        console.log(`Chart rendered: ${title}`);
     }).catch((error) => {
         console.error("Error rendering chart:", error);
     });
 }
 
-// Function to generate source counts
-function generateSourceCounts(data) {
-    const counts = {};
-    data.forEach((task) => {
-        const source = task.sourceLocation;
-        if (source) {
-            counts[source] = (counts[source] || 0) + 1;
-        }
-    });
-    console.log("Source Counts Debug: ", counts);
-    return counts;
+// Functions to generate counts
+function generateCounts(data, key) {
+    return data.reduce((counts, task) => {
+        if (task[key]) counts[task[key]] = (counts[task[key]] || 0) + 1;
+        return counts;
+    }, {});
 }
 
-// Function to generate destination counts
-function generateDestinationCounts(data) {
-    const counts = {};
-    data.forEach((task) => {
-        const destination = task.destinationLocation;
-        if (destination) {
-            counts[destination] = (counts[destination] || 0) + 1;
-        }
-    });
-    console.log("Destination Counts Debug: ", counts);
-    return counts;
-}
-
-// Function to generate source to destination counts
 function generateSourceToDestinationCounts(data) {
-    const counts = {};
-    data.forEach((task) => {
-        const source = task.sourceLocation;
-        const destination = task.destinationLocation;
-        if (source && destination) {
-            const key = `${source} -> ${destination}`;
+    return data.reduce((counts, task) => {
+        if (task.sourceLocation && task.destinationLocation) {
+            const key = `${task.sourceLocation} -> ${task.destinationLocation}`;
             counts[key] = (counts[key] || 0) + 1;
         }
-    });
-    console.log("Source to Destination Counts Debug: ", counts);
-    return counts;
+        return counts;
+    }, {});
 }
 
-// Function to generate task counts by robotId
-function generateTaskByRobotId(data) {
-    const counts = {};
-    data.forEach((task) => {
-        const robotId = task.robotId;
-        if (robotId) {
-            counts[robotId] = (counts[robotId] || 0) + 1;
-        }
-    });
-    console.log("Task Counts by Robot ID Debug: ", counts);
-    return counts;
-}
-
-// Function to filter tasks based on user inputs
+// Function to filter tasks
 function filterTasks(data) {
-    const startDate = document.getElementById("task-start-date").value;
-    const endDate = document.getElementById("task-end-date").value;
-    const startTime = document.getElementById("task-start-time").value;
-    const endTime = document.getElementById("task-end-time").value;
+    const startDateStr = document.getElementById("task-start-date").value;
+    const endDateStr = document.getElementById("task-end-date").value;
+    const startTimeStr = document.getElementById("task-start-time").value;
+    const endTimeStr = document.getElementById("task-end-time").value;
 
-    console.log("User Inputs - Start Date:", startDate, "End Date:", endDate, "Start Time:", startTime, "End Time:", endTime);
+    console.log("User Inputs - Start Date:", startDateStr, "End Date:", endDateStr, "Start Time:", startTimeStr, "End Time:", endTimeStr);
+
+    // Convert date and time inputs into Date objects
+    const startDateTime = startDateStr ? new Date(`${startDateStr}T${startTimeStr || "00:00"}`) : null;
+    const endDateTime = endDateStr ? new Date(`${endDateStr}T${endTimeStr || "23:59"}`) : null;
 
     return data.filter((task) => {
-        const taskTimestamp = task.timestamp?.$date;
-        if (!taskTimestamp) {
+        if (!task.timestamp || !task.timestamp.$date) {
             console.warn("Task has no valid timestamp:", task);
             return false;
         }
 
-        // Convert the task timestamp to a Date object
-        const taskDateObj = new Date(taskTimestamp);
+        const taskDateTime = new Date(task.timestamp.$date); // Convert task timestamp to Date object
 
-        // Extract date and time components
-        const taskDate = taskDateObj.toISOString().split("T")[0];
-        const taskTime = taskDateObj.toTimeString().split(" ")[0].substring(0, 5);
+        console.log("Checking Task - DateTime:", taskDateTime);
 
-        console.log("Task Timestamp:", taskTimestamp, "Task Date:", taskDate, "Task Time:", taskTime);
+        // Apply filtering conditions
+        if (startDateTime && taskDateTime < startDateTime) return false;
+        if (endDateTime && taskDateTime > endDateTime) return false;
 
-        // Filter by date (if startDate or endDate is provided)
-        if (startDate && taskDate < startDate) {
-            console.log("Task filtered out (before start date):", task);
-            return false;
-        }
-        if (endDate && taskDate > endDate) {
-            console.log("Task filtered out (after end date):", task);
-            return false;
-        }
-
-        // Filter by time (if startTime or endTime is provided)
-        if (startTime && taskTime < startTime) {
-            console.log("Task filtered out (before start time):", task);
-            return false;
-        }
-        if (endTime && taskTime > endTime) {
-            console.log("Task filtered out (after end time):", task);
-            return false;
-        }
-
-        console.log("Task included in results:", task);
         return true;
     });
 }
 
 // Function to plot task report
 function plotTaskReport() {
-    if (!taskData || taskData.length === 0) {
-        console.warn("No task data available to plot.");
-        alert("No task data available to plot. Please upload a JSON file.");
+    if (!taskData.length) {
+        console.warn("No task data available.");
+        alert("No task data available. Please upload a JSON file.");
         return;
     }
 
-    // Filter tasks based on user inputs
     const filteredTasks = filterTasks(taskData);
 
-    if (filteredTasks.length === 0) {
-        console.warn("No tasks match the filter criteria.");
-        alert("No tasks match the filter criteria. Please adjust your filters.");
+    if (!filteredTasks.length) {
+        console.warn("No tasks match the filters.");
+        alert("No tasks match the filters. Adjust the date/time range.");
         return;
     }
 
-    // Debug: Log filtered tasks
     console.log("Filtered Tasks:", filteredTasks);
 
-    // Clear the graph container before rendering new charts
-    const graphContainer = document.getElementById("graph-container");
-    graphContainer.innerHTML = "";
+    // Clear old charts
+    document.getElementById("graph-container").innerHTML = "";
 
-    // Generate counts for each chart
-    const sourceCounts = generateSourceCounts(filteredTasks);
-    const destinationCounts = generateDestinationCounts(filteredTasks);
-    const sourceToDestinationCounts = generateSourceToDestinationCounts(filteredTasks);
-    const taskByRobotId = generateTaskByRobotId(filteredTasks);
-
-    // Debug: Log counts for each chart
-    console.log("Source Counts:", sourceCounts);
-    console.log("Destination Counts:", destinationCounts);
-    console.log("Source to Destination Counts:", sourceToDestinationCounts);
-    console.log("Task Counts by Robot ID:", taskByRobotId);
-
-    // Create all the charts
-    createBarChart("Source Tasks", sourceCounts, "source-bar-chart");
-    createBarChart("Destination Tasks", destinationCounts, "destination-bar-chart");
-    createBarChart("Source to Destination Tasks", sourceToDestinationCounts, "source-to-destination-bar-chart");
-    createBarChart("Tasks by Robot ID", taskByRobotId, "tasks-by-robot-id-bar-chart");
+    // Generate and render charts
+    createBarChart("Source Tasks", generateCounts(filteredTasks, "sourceLocation"), "source-bar-chart");
+    createBarChart("Destination Tasks", generateCounts(filteredTasks, "destinationLocation"), "destination-bar-chart");
+    createBarChart("Source to Destination", generateSourceToDestinationCounts(filteredTasks), "source-to-destination-chart");
+    createBarChart("Tasks by Robot ID", generateCounts(filteredTasks, "robotId"), "tasks-by-robot-id-chart");
 }
 
-// Function to handle file input and read the task data
+// Function to handle file upload
 function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) {
@@ -631,7 +547,7 @@ function handleFileUpload(event) {
     reader.onload = function (e) {
         try {
             taskData = JSON.parse(e.target.result);
-            console.log("File data loaded:", taskData);
+            console.log("Task data loaded:", taskData);
         } catch (error) {
             console.error("Error parsing JSON file:", error);
         }
@@ -639,61 +555,14 @@ function handleFileUpload(event) {
     reader.readAsText(file);
 }
 
-// Function to download task data
-function downloadFile() {
-    if (!taskData || taskData.length === 0) {
-        console.warn("No data available to download.");
-        alert("No task data available to download. Please upload a JSON file.");
-        return;
-    }
-
-    const jsonBlob = new Blob([JSON.stringify(taskData, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(jsonBlob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "taskData.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url); // Clean up URL object
-}
-
-// Initialize the application
+// Initialize event listeners
 document.addEventListener("DOMContentLoaded", () => {
-    // console.log("DOM fully loaded and parsed.");
+    document.querySelector(".submit-btn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        plotTaskReport();
+    });
 
-    // Attach event listeners
-    const submitButton = document.querySelector(".submit-btn");
-    // const downloadButton = document.querySelector(".download-btn");
-    const fileInput = document.getElementById("task-json-file");
-
-    if (submitButton) {
-        submitButton.addEventListener("click", (e) => {
-            e.preventDefault(); // Prevent form submission
-            console.log("Submit button clicked.");
-            plotTaskReport();
-        });
-    } else {
-        console.error("Submit button not found in the DOM.");
-    }
-
-    // if (downloadButton) {
-    //     downloadButton.addEventListener("click", (e) => {
-    //         e.preventDefault(); // Prevent form submission
-    //         console.log("Download button clicked.");
-    //         downloadFile();
-    //     });
-    // } else {
-    //     console.error("Download button not found in the DOM.");
-    // }
-
-    if (fileInput) {
-        fileInput.addEventListener("change", handleFileUpload);
-    } else {
-        console.error("File input element not found in the DOM.");
-    }
+    document.getElementById("task-json-file")?.addEventListener("change", handleFileUpload);
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1372,133 +1241,4 @@ function renderTaskCycleChart(labels, cycleDifferences) {
 //         submitThroughputFilters();
 //     }
 // }
-
-document.addEventListener("DOMContentLoaded", function () {
-    const filters = ["errors", "tasks", "delays", "plots"];
-    let selectedFiles = {};  // Global storage for files
-
-    filters.forEach(filter => {
-        document.querySelectorAll(`input[name='${filter}']`).forEach(checkbox => {
-            checkbox.addEventListener("change", function () {
-                handleCheckboxChange(filter);
-            });
-        });
-    });
-
-    document.getElementById("input-folder").addEventListener("change", function (event) {
-        handleFileSelection(event);
-    });
-});
-
-function handleCheckboxChange(filterType) {
-    const allCheckbox = document.getElementById(`all-${filterType}`);
-    const checkboxes = document.querySelectorAll(`input[name='${filterType}']:not(#all-${filterType})`);
-
-    if (allCheckbox.checked) {
-        checkboxes.forEach(cb => cb.checked = true);
-    } else {
-        const allChecked = [...checkboxes].every(cb => cb.checked);
-        allCheckbox.checked = allChecked;
-    }
-    updateDisplay(filterType);
-}
-
-function updateDisplay(filterType) {
-    const selected = [];
-    document.querySelectorAll(`input[name='${filterType}']:checked`).forEach(checkbox => {
-        if (checkbox.id !== `all-${filterType}`) {
-            selected.push(checkbox.value);
-        }
-    });
-
-    console.log(`Selected ${filterType}:`, selected);
-    renderPlot(filterType, selected);
-}
-
-function renderPlot(filterType, selectedFilters) {
-    if (filterType === "tasks") {
-        processTaskData(selectedFilters);
-    }
-}
-
-function processTaskData(selectedFilters) {
-    const fmsTaskFileKey = Object.keys(selectedFiles).find(name => name.includes("fmsTask.json"));
-    
-    if (!fmsTaskFileKey) {
-        console.error("Error: fmsTask.json not found in selected files.");
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-        try {
-            const data = JSON.parse(event.target.result);
-            let pickCount = 0, dropCount = 0, pickToDropCount = 0;
-            let robotTaskCounts = {};
-
-            data.forEach(task => {
-                if (selectedFilters.includes("pick-tasks") && task.sourceLocation) {
-                    pickCount++;
-                }
-                if (selectedFilters.includes("drop-tasks") && task.destinationLocation) {
-                    dropCount++;
-                }
-                if (selectedFilters.includes("pick-to-drop-tasks") && task.sourceLocation && task.destinationLocation) {
-                    pickToDropCount++;
-                }
-                if (selectedFilters.includes("tasks-by-robot")) {
-                    robotTaskCounts[task.robotId] = (robotTaskCounts[task.robotId] || 0) + 1;
-                }
-            });
-
-            displayTaskCounts(pickCount, dropCount, pickToDropCount, robotTaskCounts);
-        } catch (error) {
-            console.error("Error parsing task data:", error);
-        }
-    };
-    reader.readAsText(selectedFiles[fmsTaskFileKey]);
-}
-
-function displayTaskCounts(pick, drop, pickToDrop, robots) {
-    let output = `<p>Pick Tasks: ${pick}</p><p>Drop Tasks: ${drop}</p><p>Pick to Drop Tasks: ${pickToDrop}</p>`;
-    output += `<p>Tasks by Each Robot:</p><ul>`;
-    for (const robotId in robots) {
-        output += `<li>Robot ${robotId}: ${robots[robotId]} tasks</li>`;
-    }
-    output += `</ul>`;
-
-    let displayContainer = document.getElementById("display-container");
-    if (!displayContainer) {
-        displayContainer = document.createElement("div");
-        displayContainer.id = "display-container";
-        document.body.appendChild(displayContainer);
-    }
-    displayContainer.innerHTML = output;
-}
-
-function handleFileSelection(event) {
-    const allowedSuffixes = ["agentErrors.json", "fmsTask.json", "throughputData.json"];
-    const files = Array.from(event.target.files);
-
-    files.forEach(file => {
-        if (allowedSuffixes.some(suffix => file.name.endsWith(suffix))) {
-            selectedFiles[file.name] = file; // Store reference correctly
-        }
-    });
-
-    console.log("Filtered Files:", Object.keys(selectedFiles));
-}
-
-function submitAllReportsFilters() {
-    console.log("Submit button clicked.");
-
-    const fmsTaskFileKey = Object.keys(selectedFiles).find(name => name.includes("fmsTask.json"));
-
-    if (!fmsTaskFileKey) {
-        console.warn("No task data available to plot.");
-        return;
-    }
-
-    renderPlot("tasks", ["pick-tasks", "drop-tasks", "pick-to-drop-tasks", "tasks-by-robot"]);
-}
 
