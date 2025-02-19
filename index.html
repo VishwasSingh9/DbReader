@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjsf-adapter-date-fns"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+
 </head>
 <body>
 
@@ -30,270 +32,58 @@
     <!-- Filter Containers -->
 
     <!-- All Reports Filter -->
-    <!-- <div class="filter-container hidden" id="all-reports">
-        <div class="filter-group">
-            <label></label>
-            <div class="dropdown">
-                <button class="dropbtn">Select Errors</button>
-                <div class="dropdown-content">
-                    <div>
-                        <input type="checkbox" id="all-errors" name="errors" value="all-errors">
-                        <label for="all-errors">All Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="network-errors" name="errors" value="network-errors">
-                        <label for="network-errors">Network Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="start-stop-errors" name="errors" value="start-stop-errors">
-                        <label for="start-stop-errors">Start/Stop Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="navigation-errors" name="errors" value="navigation-errors">
-                        <label for="navigation-errors">Navigation Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="diagnostic-errors" name="errors" value="diagnostic-errors">
-                        <label for="diagnostic-errors">Diagnostic Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="motor-driver-errors" name="errors" value="motor-driver-errors">
-                        <label for="motor-driver-errors">Motor-Driver Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="saviour-errors" name="errors" value="saviour-errors">
-                        <label for="saviour-errors">Saviour Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="loading-unloading-errors" name="errors" value="loading-unloading-errors">
-                        <label for="loading-unloading-errors">Loading/Unloading Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="charger-errors" name="errors" value="charger-errors">
-                        <label for="charger-errors">Charger Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="estop-errors" name="errors" value="estop-errors">
-                        <label for="estop-errors">Estop Errors</label>
-                    </div>
-                </div>
+    <form id="report-form">
+        <div class="filter-container" id="all-reports">
+            
+            <!-- Date-Time Selection -->
+            <div class="filter-group">
+                <label for="start-datetime">Start Date and Time:</label>
+                <input type="datetime-local" id="start-datetime" name="start-datetime">
             </div>
-        </div>
-        <div class="filter-group">
-            <label></label>
-            <div class="dropdown">
-                <button class="dropbtn">Select Tasks</button>
-                <div class="dropdown-content">
-                    <div>
-                        <input type="checkbox" id="all-tasks" name="tasks" value="all-tasks">
-                        <label for="all-tasks">All Tasks</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="pick-tasks" name="tasks" value="pick-tasks">
-                        <label for="pick-tasks">Pick Tasks</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="drop-tasks" name="tasks" value="drop-tasks">
-                        <label for="drop-tasks">Drop Tasks</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="pick-to-drop-tasks" name="tasks" value="pick-to-drop-tasks">
-                        <label for="pick-to-drop-tasks">Pick to Drop Tasks</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="tasks-by-robot" name="tasks" value="tasks-by-robot">
-                        <label for="tasks-by-robot">Tasks by Each Robot</label>
-                    </div>
-                </div>
+            <div class="filter-group">
+                <label for="end-datetime">End Date and Time:</label>
+                <input type="datetime-local" id="end-datetime" name="end-datetime">
             </div>
-        </div>
-        <div class="filter-group">
-            <label></label>
-            <div class="dropdown">
-                <button class="dropbtn">Select Delays</button>
-                <div class="dropdown-content">
-                    <div>
-                        <input type="checkbox" id="all-delays" name="delays" value="all-delays">
-                        <label for="all-delays">All</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="loading-delay" name="delays" value="loading-delay">
-                        <label for="loading-delay">Loading Delay</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="task-delay" name="delays" value="task-delay">
-                        <label for="task-delay">Task Delay</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="task-cycle" name="delays" value="task-cycle">
-                        <label for="task-cycle">Task Cycle</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="filter-group">
-            <label></label>
-            <div class="dropdown">
-                <button class="dropbtn">Select Plots</button>
-                <div class="dropdown-content">
-                    <div>
-                        <input type="checkbox" id="all-plots" name="plots" value="all-plots">
-                        <label for="all-plots">All</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="throughput-plots" name="plots" value="throughput-plots">
-                        <label for="throughput-plots">Throughput Plots</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="filter-group">
-            <label for="start-datetime">Start Date and Time:</label>
-            <input type="datetime-local" id="start-datetime" name="start-datetime">
-        </div>
-        <div class="filter-group">
-            <label for="end-datetime">End Date and Time:</label>
-            <input type="datetime-local" id="end-datetime" name="end-datetime">
-        </div>
-        <div class="filter-group">
-            <label for="input-folder">Input Folder:</label>
-            <input type="file" id="input-folder" name="input-folder" webkitdirectory directory multiple>
-        </div>
-        <button type="submit" class="submit-btn" onclick="submitAllReportsFilters()">Submit</button>
-    </div> -->
-
-    <div class="filter-container hidden" id="all-reports">
-        <div class="filter-group">
-            <label></label>
-            <div class="dropdown">
-                <button class="dropbtn">Select Errors</button>
-                <div class="dropdown-content">
-                    <div>
-                        <input type="checkbox" id="all-errors" name="errors" value="all-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="all-errors">All Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="network-errors" name="errors" value="network-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="network-errors">Network Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="start-stop-errors" name="errors" value="start-stop-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="start-stop-errors">Start/Stop Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="navigation-errors" name="errors" value="navigation-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="navigation-errors">Navigation Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="diagnostic-errors" name="errors" value="diagnostic-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="diagnostic-errors">Diagnostic Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="motor-driver-errors" name="errors" value="motor-driver-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="motor-driver-errors">Motor-Driver Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="saviour-errors" name="errors" value="saviour-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="saviour-errors">Saviour Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="loading-unloading-errors" name="errors" value="loading-unloading-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="loading-unloading-errors">Loading/Unloading Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="charger-errors" name="errors" value="charger-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="charger-errors">Charger Errors</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="estop-errors" name="errors" value="estop-errors" onchange="handleCheckboxChange('errors')">
-                        <label for="estop-errors">Estop Errors</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="filter-group">
-            <label></label>
-            <div class="dropdown">
-                <button class="dropbtn">Select Tasks</button>
-                <div class="dropdown-content">
-                    <div>
-                        <input type="checkbox" id="all-tasks" name="tasks" value="all-tasks" onchange="handleCheckboxChange('tasks')">
-                        <label for="all-tasks">All Tasks</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="pick-tasks" name="tasks" value="pick-tasks" onchange="handleCheckboxChange('tasks')">
-                        <label for="pick-tasks">Pick Tasks</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="drop-tasks" name="tasks" value="drop-tasks" onchange="handleCheckboxChange('tasks')">
-                        <label for="drop-tasks">Drop Tasks</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="pick-to-drop-tasks" name="tasks" value="pick-to-drop-tasks" onchange="handleCheckboxChange('tasks')">
-                        <label for="pick-to-drop-tasks">Pick to Drop Tasks</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="tasks-by-robot" name="tasks" value="tasks-by-robot" onchange="handleCheckboxChange('tasks')">
-                        <label for="tasks-by-robot">Tasks by Each Robot</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="filter-group">
-            <label></label>
-            <div class="dropdown">
-                <button class="dropbtn">Select Delays</button>
-                <div class="dropdown-content">
-                    <div>
-                        <input type="checkbox" id="all-delays" name="delays" value="all-delays" onchange="handleCheckboxChange('delays')">
-                        <label for="all-delays">All</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="loading-delay" name="delays" value="loading-delay" onchange="handleCheckboxChange('delays')">
-                        <label for="loading-delay">Loading Delay</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="task-delay" name="delays" value="task-delay" onchange="handleCheckboxChange('delays')">
-                        <label for="task-delay">Task Delay</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="task-cycle" name="delays" value="task-cycle" onchange="handleCheckboxChange('delays')">
-                        <label for="task-cycle">Task Cycle</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="filter-group">
-            <label></label>
-            <div class="dropdown">
-                <button class="dropbtn">Select Plots</button>
-                <div class="dropdown-content">
-                    <div>
-                        <input type="checkbox" id="all-plots" name="plots" value="all-plots" onchange="handleCheckboxChange('plots')">
-                        <label for="all-plots">All</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="throughput-plots" name="plots" value="throughput-plots" onchange="handleCheckboxChange('plots')">
-                        <label for="throughput-plots">Throughput Plots</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="filter-group">
-            <label for="start-datetime">Start Date and Time:</label>
-            <input type="datetime-local" id="start-datetime" name="start-datetime">
-        </div>
-        <div class="filter-group">
-            <label for="end-datetime">End Date and Time:</label>
-            <input type="datetime-local" id="end-datetime" name="end-datetime">
-        </div>
-        <div class="filter-group">
-            <label for="input-folder">Input Folder:</label>
-            <input type="file" id="input-folder" name="input-folder" webkitdirectory directory multiple>
-        </div>
-        <button type="submit" class="submit-btn" onclick="submitAllReportsFilters()">Submit</button>
-    </div>
     
+            <!-- Folder Input -->
+            <div class="filter-group">
+                <label for="input-folder">Input Folder:</label>
+                <input type="file" id="input-folder" name="input-folder" webkitdirectory directory multiple>
+            </div>
+    
+            <!-- Submit Button -->
+            <button type="button" class="submit-btn" onclick="validateAndShowPopup()">Submit</button>
+        </div>
+    </form>
+    <!-- Plot Selection Popup -->
+    <div id="plot-popup" class="popup">
+        <div class="popup-content">
+            <h3>Select the Plot Type</h3>
+            <div>
+                <input type="checkbox" id="error-plots" name="plots" value="error-plots">
+                <label for="error-plots">Error Plots</label>
+            </div>
+            <div>
+                <input type="checkbox" id="task-plots" name="plots" value="task-plots">
+                <label for="task-plots">Task Plots</label>
+            </div>
+            <div>
+                <input type="checkbox" id="delay-plots" name="plots" value="delay-plots">
+                <label for="delay-plots">Delay Plots</label>
+            </div>
+            <div>
+                <input type="checkbox" id="throughput-plots" name="plots" value="throughput-plots">
+                <label for="throughput-plots">Throughput Plots</label>
+            </div>
+            <div>
+                <input type="checkbox" id="all-plots" name="plots" value="all-plots" onchange="selectAllPlots(this)">
+                <label for="all-plots"><strong>All Plots</strong></label>
+            </div>
+    
+            <button onclick="submitForm()">Submit Selection</button>
+        </div>
+    </div>
+
     <!-- Throughput Filter -->
     <div class="filter-container hidden" id="throughput-filters">
         <div class="filter-group">
