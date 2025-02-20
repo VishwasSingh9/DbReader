@@ -510,8 +510,8 @@ function filterTasks(data) {
 // Function to plot task report
 function plotTaskReport() {
     if (!taskData.length) {
-        console.warn("No task data available.");
-        alert("No task data available. Please upload a JSON file.");
+        //console.warn("No task data available.");
+        //alert("No task data available. Please upload a JSON file.");
         return;
     }
 
@@ -1180,19 +1180,17 @@ function submitForm() {
                 try {
                     let jsonData = JSON.parse(event.target.result);
 
-                    if (jsonData.some(entry => entry.hasOwnProperty("errorCode") && entry.hasOwnProperty("errorCount"))) {
-                        errorData.push(...jsonData);
-                    }
-
-                    if (jsonData.some(entry => entry.hasOwnProperty("throughput") && entry.hasOwnProperty("lastModifiedDate"))) {
-                        throughputData.push(...jsonData);
-                    }
-
-                    if (jsonData.some(entry => entry.hasOwnProperty("taskCompleted") && entry.hasOwnProperty("taskFailed"))) {
+                    // ✅ Fix: Correct task data detection
+                    if (jsonData.some(entry => entry.hasOwnProperty("taskId") && entry.hasOwnProperty("sourceLocation") && entry.hasOwnProperty("destinationLocation") && entry.hasOwnProperty("robotId"))) {
                         taskData.push(...jsonData);
-                    }
-
-                    if (jsonData.some(entry => entry.hasOwnProperty("totalTaskWaitingTime") && entry.hasOwnProperty("taskCancelled"))) {
+                    } 
+                    else if (jsonData.some(entry => entry.hasOwnProperty("errorCode") && entry.hasOwnProperty("errorCount"))) {
+                        errorData.push(...jsonData);
+                    } 
+                    else if (jsonData.some(entry => entry.hasOwnProperty("throughput") && entry.hasOwnProperty("lastModifiedDate"))) {
+                        throughputData.push(...jsonData);
+                    } 
+                    else if (jsonData.some(entry => entry.hasOwnProperty("totalTaskWaitingTime") && entry.hasOwnProperty("taskCancelled"))) {
                         delayData.push(...jsonData);
                     }
 
@@ -1223,7 +1221,7 @@ function submitForm() {
 
         if (selectedPlots.includes("task-plots")) {
             createGraphContainer("task-plot", "Task Plot");
-            plotTaskGraph(taskData, "task-plot");
+            plotTaskGraph(taskData, "task-plot"); // ✅ Ensure taskData is correctly passed
         }
 
         if (selectedPlots.includes("delay-plots")) {
@@ -1371,6 +1369,111 @@ function plotThroughputGraph(throughputData, divId) {
 
 //     Plotly.newPlot(divId, [trace1, trace2], layout, { scrollZoom: true });
 // }
+
+function generateCounts(data, key) {
+    let counts = {};
+    data.forEach((task) => {
+        if (task[key] !== undefined && task[key] !== null) { 
+            let value = String(task[key]);  
+            counts[value] = (counts[value] || 0) + 1;
+        }
+    });
+    console.log(`Counts for ${key}:`, counts);
+    return counts;
+}
+
+// Function to count pick-to-drop occurrences
+function generatePickToDropCounts(data) {
+    let counts = {};
+    data.forEach((task) => {
+        if (task.sourceLocation && task.destinationLocation) {
+            const key = `${task.sourceLocation} -> ${task.destinationLocation}`;
+            counts[key] = (counts[key] || 0) + 1;
+        }
+    });
+    console.log("Pick-to-Drop Counts:", counts);
+    return counts;
+}
+
+// Function to plot a bar chart
+function plotBarChart(divId, title, labels, values, color) {
+    let trace = {
+        x: labels,
+        y: values,
+        type: "bar",
+        name: title,
+        marker: { color: color }
+    };
+
+    let layout = {
+        title: title,
+        xaxis: { 
+            title: "Category", 
+            tickangle: -45,
+            type: "category", // ✅ Treat x-axis as categorical
+            categoryorder: "array", // ✅ Prevents auto-scaling
+            categoryarray: labels // ✅ Forces Plotly to use only these labels
+        },
+        yaxis: { title: "Task Count" },
+        margin: { t: 50, r: 50, b: 100, l: 50 }
+    };
+
+    Plotly.newPlot(divId, [trace], layout);
+}
+
+// Function to plot all graphs one after another in the same div
+function plotTaskGraph(taskData, divId) {
+    if (!Array.isArray(taskData) || taskData.length === 0) {
+        console.warn("No valid task data available.");
+        alert("No valid task data available.");
+        return;
+    }
+
+    console.log("Processing task data...", taskData);
+
+    // Generate counts for each category
+    const pickCounts = generateCounts(taskData, "sourceLocation");
+    const dropCounts = generateCounts(taskData, "destinationLocation");
+    const pickToDropCounts = generatePickToDropCounts(taskData);
+    const robotTaskCounts = generateCounts(taskData, "robotId");
+
+    // ✅ Filter out robotIds with zero tasks
+    let filteredRobotIds = [];
+    let filteredRobotValues = [];
+    
+    Object.keys(robotTaskCounts).forEach(robotId => {
+        if (robotTaskCounts[robotId] > 0) {
+            filteredRobotIds.push(robotId);
+            filteredRobotValues.push(robotTaskCounts[robotId]);
+        }
+    });
+
+    console.log("Filtered Robot Task Counts:", { filteredRobotIds, filteredRobotValues });
+
+    // Render graphs in the same div (overriding one after another)
+    setTimeout(() => {
+        plotBarChart(divId, "Pick Tasks", Object.keys(pickCounts), Object.values(pickCounts), "blue");
+    }, 0);
+
+    setTimeout(() => {
+        plotBarChart(divId, "Drop Tasks", Object.keys(dropCounts), Object.values(dropCounts), "orange");
+    }, 2000);
+
+    setTimeout(() => {
+        plotBarChart(divId, "Pick to Drop", Object.keys(pickToDropCounts), Object.values(pickToDropCounts), "green");
+    }, 4000);
+
+    setTimeout(() => {
+        if (filteredRobotIds.length > 0) {
+            plotBarChart(divId, "Tasks by Robot", filteredRobotIds, filteredRobotValues, "red");
+        } else {
+            console.warn("No robots have completed any tasks.");
+            alert("No robots have completed any tasks.");
+        }
+    }, 6000);
+}
+
+
 
 // Function to plot Delay Graph
 function plotDelayGraph(delayData, divId) {
