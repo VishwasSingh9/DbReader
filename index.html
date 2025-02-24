@@ -37,7 +37,7 @@
     <!-- All Reports Filter -->
     <form id="report-form">
         <div class="filter-container" id="all-reports">
-            
+
             <!-- Date-Time Selection -->
             <div class="filter-group">
                 <label for="start-datetime">Start Date and Time:</label>
@@ -47,16 +47,17 @@
                 <label for="end-datetime">End Date and Time:</label>
                 <input type="datetime-local" id="end-datetime" name="end-datetime">
             </div>
-    
+
             <!-- Folder Input -->
             <div class="filter-group">
                 <label for="input-folder">Input Folder:</label>
                 <input type="file" id="input-folder" name="input-folder" webkitdirectory directory multiple>
             </div>
-    
+
             <!-- Submit Button -->
             <button type="button" class="submit-btn" onclick="validateAndShowPopup()">Submit</button>
-            <button type="button" class="download-btn" onclick="downloadPlotsAsPDF()">Download All Plots</button>
+            <button type="button" id="download-btn">Reports</button>
+
         </div>
     </form>
     <!-- Plot Selection Popup -->
