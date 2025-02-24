@@ -64,7 +64,7 @@ window.onresize = function () {
 
     const plotContainer = graphContainer.querySelector('.plot-container');
     if (!plotContainer) {
-        console.warn("No Plotly chart found inside the graph container.");
+        // console.warn("No Plotly chart found inside the graph container.");
         return;
     }
 
@@ -953,197 +953,6 @@ function renderTaskCycleChart(labels, cycleDifferences) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-// document.addEventListener("DOMContentLoaded", function () {
-//     document.getElementById("plot-popup").style.display = "none"; // Hide popup initially
-// });
-
-// function validateAndShowPopup() {
-//     const startDate = document.getElementById("start-datetime").value;
-//     const endDate = document.getElementById("end-datetime").value;
-//     const inputFolder = document.getElementById("input-folder").files;
-
-//     if (!startDate || !endDate) {
-//         alert("Please select both Start and End Date-Time.");
-//         return;
-//     }
-//     if (inputFolder.length === 0) {
-//         alert("Please select a folder containing JSON files.");
-//         return;
-//     }
-
-//     document.getElementById("plot-popup").style.display = "block"; // Show popup
-// }
-
-// function selectAllPlots(checkbox) {
-//     const checkboxes = document.querySelectorAll("#plot-popup input[type=checkbox]");
-//     checkboxes.forEach((cb) => {
-//         if (cb !== checkbox) {
-//             cb.checked = checkbox.checked;
-//         }
-//     });
-// }
-
-// function submitForm() {
-//     const selectedPlots = [];
-//     document.querySelectorAll("#plot-popup input[name='plots']:checked").forEach((cb) => {
-//         selectedPlots.push(cb.value);
-//     });
-
-//     if (selectedPlots.length === 0) {
-//         alert("Please select at least one plot type.");
-//         return;
-//     }
-
-//     document.getElementById("plot-popup").style.display = "none"; // Hide popup
-
-//     processJSONFiles(selectedPlots);
-// }
-
-// function processJSONFiles(selectedPlots) {
-//     const files = document.getElementById("input-folder").files;
-//     const throughputData = [];
-
-//     let fileReadPromises = [];
-
-//     for (let file of files) {
-//         if (file.name.endsWith(".json")) {
-//             let reader = new FileReader();
-//             let promise = new Promise((resolve) => {
-//                 reader.onload = function (event) {
-//                     try {
-//                         let jsonData = JSON.parse(event.target.result);
-//                         if (jsonData.some(entry => entry.throughput !== undefined)) {
-//                             throughputData.push(...jsonData.filter(entry => entry.throughput !== undefined));
-//                         }
-//                     } catch (e) {
-//                         console.error("Error parsing JSON:", e);
-//                     }
-//                     resolve();
-//                 };
-//                 reader.readAsText(file);
-//             });
-//             fileReadPromises.push(promise);
-//         }
-//     }
-
-//     Promise.all(fileReadPromises).then(() => {
-//         console.log("Throughput Data Extracted:", throughputData);
-
-//         if (selectedPlots.includes("throughput-plots")) {
-//             plotThroughput(throughputData);
-//         }
-//     });
-// }
-
-// function plotThroughput(throughputData) {
-//     if (throughputData.length === 0) {
-//         alert("No throughput data found in the selected files.");
-//         return;
-//     }
-
-//     // Extract timestamps and throughput values
-//     let timestamps = [];
-//     let throughputs = [];
-
-//     throughputData.forEach(entry => {
-//         let time = new Date(entry.lastModifiedDate?.$date || entry.lastModifiedDate).toLocaleString();
-//         timestamps.push(time);
-//         throughputs.push(entry.throughput);
-//     });
-
-//     // Sort data by timestamp
-//     let sortedData = timestamps.map((time, index) => ({ time, throughput: throughputs[index] }))
-//         .sort((a, b) => new Date(a.time) - new Date(b.time));
-
-//     timestamps = sortedData.map(d => d.time);
-//     throughputs = sortedData.map(d => d.throughput);
-
-//     // Create Plotly Trace
-//     let trace = {
-//         x: timestamps,
-//         y: throughputs,
-//         mode: "lines+markers",
-//         type: "scatter",
-//         marker: { color: "blue", size: 6 },
-//         line: { width: 2 }
-//     };
-
-//     let layout = {
-//         title: "Throughput Over Time",
-//         xaxis: { title: "Time", type: "category", tickangle: -45 },
-//         yaxis: { title: "Throughput", zeroline: true },
-//         hovermode: "closest",
-//         dragmode: "pan", // Enables panning
-//     };
-
-//     let config = {
-//         responsive: true,
-//         scrollZoom: true // Enables zoom with mouse scroll
-//     };
-
-//     // Plot the graph in #graph-container
-//     Plotly.newPlot("graph-container", [trace], layout, config);
-
-//     console.log("Throughput Chart Plotted Successfully with Zoom & Pan!");
-// }
-
-// // Function to plot error data using Plotly
-// function plotErrorData(errorData) {
-//     if (errorData.length === 0) {
-//         alert("No error data found.");
-//         return;
-//     }
-
-//     let errorCounts = {};
-
-//     errorData.forEach(entry => {
-//         let errorCode = entry.errorCode;
-//         if (errorCounts[errorCode]) {
-//             errorCounts[errorCode]++;
-//         } else {
-//             errorCounts[errorCode] = 1;
-//         }
-//     });
-
-//     let errorCodes = Object.keys(errorCounts).map(code => parseInt(code));
-//     let errorFrequencies = Object.values(errorCounts);
-
-//     let sortedData = errorCodes.map((code, index) => ({
-//         code, count: errorFrequencies[index]
-//     })).sort((a, b) => a.code - b.code);
-
-//     errorCodes = sortedData.map(d => d.code);
-//     errorFrequencies = sortedData.map(d => d.count);
-
-//     let trace = {
-//         x: errorCodes,
-//         y: errorFrequencies,
-//         type: "bar",
-//         marker: { color: "red" },
-//         text: errorFrequencies.map(String),
-//         textposition: "auto"
-//     };
-
-//     let layout = {
-//         title: "Error Code Frequency",
-//         xaxis: { title: "Error Code", tickmode: "linear" },
-//         yaxis: { title: "Count" },
-//         hovermode: "closest",
-//         dragmode: "pan"
-//     };
-
-//     let config = {
-//         responsive: true,
-//         scrollZoom: true
-//     };
-
-//     Plotly.newPlot("graph-container", [trace], layout, config);
-//     console.log("Error plot generated successfully!");
-// }
-///////////////////
-//////////
-///////////////////
-
 document.getElementById("report-form").addEventListener("submit", function (event) {
     event.preventDefault(); // Prevent default form submission
     validateAndShowPopup();
@@ -1151,7 +960,7 @@ document.getElementById("report-form").addEventListener("submit", function (even
 
 function validateAndShowPopup() {
     let inputFolder = document.getElementById("input-folder").files;
-    
+
     if (inputFolder.length === 0) {
         alert("Please select a folder containing JSON files.");
         return;
@@ -1171,7 +980,6 @@ function submitForm() {
     let errorData = [];
     let throughputData = [];
     let taskData = [];
-    let delayData = [];
 
     let fileReadPromises = files.map(file => {
         return new Promise((resolve, reject) => {
@@ -1180,23 +988,18 @@ function submitForm() {
                 try {
                     let jsonData = JSON.parse(event.target.result);
 
-                    // ✅ Fix: Correct task data detection
                     if (jsonData.some(entry => entry.hasOwnProperty("taskId") && entry.hasOwnProperty("sourceLocation") && entry.hasOwnProperty("destinationLocation") && entry.hasOwnProperty("robotId"))) {
                         taskData.push(...jsonData);
-                    } 
+                    }
                     else if (jsonData.some(entry => entry.hasOwnProperty("errorCode") && entry.hasOwnProperty("errorCount"))) {
                         errorData.push(...jsonData);
-                    } 
+                    }
                     else if (jsonData.some(entry => entry.hasOwnProperty("throughput") && entry.hasOwnProperty("lastModifiedDate"))) {
                         throughputData.push(...jsonData);
-                    } 
-                    else if (jsonData.some(entry => entry.hasOwnProperty("totalTaskWaitingTime") && entry.hasOwnProperty("taskCancelled"))) {
-                        delayData.push(...jsonData);
                     }
 
                     resolve();
                 } catch (error) {
-                    console.error("Error parsing JSON:", error);
                     reject(error);
                 }
             };
@@ -1205,7 +1008,6 @@ function submitForm() {
         });
     });
 
-    // After all files are read, process selected plots
     Promise.all(fileReadPromises).then(() => {
         document.getElementById("graph-container").innerHTML = ""; // Clear previous plots
 
@@ -1221,16 +1023,22 @@ function submitForm() {
 
         if (selectedPlots.includes("task-plots")) {
             createGraphContainer("task-plot", "Task Plot");
-            plotTaskGraph(taskData, "task-plot"); // ✅ Ensure taskData is correctly passed
+            plotTaskGraph(taskData, "task-plot");
         }
 
-        if (selectedPlots.includes("delay-plots")) {
+        let delayData = taskData.filter(entry =>
+            entry.hasOwnProperty("RecvTime") &&
+            entry.hasOwnProperty("AssignTime") &&
+            entry.hasOwnProperty("PickTime") &&
+            entry.hasOwnProperty("CompletedTime")
+        );
+
+        if (selectedPlots.includes("delay-plots") && delayData.length > 0) {
             createGraphContainer("delay-plot", "Delay Plot");
-            plotDelayGraph(delayData, "delay-plot");
+            plotDelayHistograms(delayData, "delay-plot");
         }
-
     }).catch(error => {
-        console.error("Error reading files:", error);
+        console.error("Error processing JSON files:", error);
     });
 }
 
@@ -1261,16 +1069,14 @@ function plotErrorGraph(errorData, divId) {
     // Count occurrences of each errorCode
     errorData.forEach(entry => {
         if (entry.hasOwnProperty("errorCode")) {
-            let errorCode = String(entry.errorCode); // Keep as a string to avoid sorting issues
+            let errorCode = String(entry.errorCode);
             errorCounts[errorCode] = (errorCounts[errorCode] || 0) + 1;
         }
     });
-
-    // Convert to sorted array (only present error codes)
     let sortedData = Object.entries(errorCounts)
-        .map(([code, count]) => ({ code, count })) // Keep code as string to match labels correctly
-        .filter(d => d.count > 0) // Ensure only error codes that occurred are plotted
-        .sort((a, b) => parseInt(a.code) - parseInt(b.code)); // Sort numerically
+        .map(([code, count]) => ({ code, count }))
+        .filter(d => d.count > 0)
+        .sort((a, b) => parseInt(a.code) - parseInt(b.code));
 
     // If no valid error codes, do nothing
     if (sortedData.length === 0) {
@@ -1279,12 +1085,12 @@ function plotErrorGraph(errorData, divId) {
     }
 
     let trace = {
-        x: sortedData.map(d => `Error ${d.code}`), // Prefix for clarity
+        x: sortedData.map(d => `Error ${d.code}`),
         y: sortedData.map(d => d.count),
         type: "bar",
         name: "Error Counts",
         marker: { color: "red" },
-        text: sortedData.map(d => d.count), // Show count on bars
+        text: sortedData.map(d => d.count),
         textposition: "auto"
     };
 
@@ -1333,55 +1139,18 @@ function plotThroughputGraph(throughputData, divId) {
     Plotly.newPlot(divId, [trace], layout, { scrollZoom: true });
 }
 
-// Function to plot Task Graph
-// function plotTaskGraph(taskData, divId) {
-//     if (taskData.length === 0) return;
+/////////////////////////            Task Graph
 
-//     let completedTasks = taskData.map(entry => entry.taskCompleted || 0);
-//     let failedTasks = taskData.map(entry => entry.taskFailed || 0);
-//     let timestamps = taskData.map(entry => new Date(entry.lastModifiedDate.$date));
-
-//     let trace1 = {
-//         x: timestamps,
-//         y: completedTasks,
-//         type: "scatter",
-//         mode: "lines+markers",
-//         name: "Completed Tasks",
-//         line: { color: "green" }
-//     };
-
-//     let trace2 = {
-//         x: timestamps,
-//         y: failedTasks,
-//         type: "scatter",
-//         mode: "lines+markers",
-//         name: "Failed Tasks",
-//         line: { color: "red" }
-//     };
-
-//     let layout = {
-//         title: "Task Performance Over Time",
-//         xaxis: { title: "Time" },
-//         yaxis: { title: "Task Count" },
-//         hovermode: "closest",
-//         dragmode: "pan"
-//     };
-
-//     Plotly.newPlot(divId, [trace1, trace2], layout, { scrollZoom: true });
-// }
-
-function generateCounts(data, key) {
-    let counts = {};
-    data.forEach((task) => {
-        if (task[key] !== undefined && task[key] !== null) { 
-            let value = String(task[key]);  
-            counts[value] = (counts[value] || 0) + 1;
-        }
-    });
-    console.log(`Counts for ${key}:`, counts);
-    return counts;
+// Function to ensure divs exist for task graphs
+function ensureTaskGraphDiv(divId) {
+    let container = document.getElementById("graph-container");
+    if (!document.getElementById(divId)) {
+        let newDiv = document.createElement("div");
+        newDiv.id = divId;
+        newDiv.style.marginBottom = "20px"; // Add some spacing
+        container.appendChild(newDiv);
+    }
 }
-
 // Function to count pick-to-drop occurrences
 function generatePickToDropCounts(data) {
     let counts = {};
@@ -1391,10 +1160,53 @@ function generatePickToDropCounts(data) {
             counts[key] = (counts[key] || 0) + 1;
         }
     });
-    console.log("Pick-to-Drop Counts:", counts);
     return counts;
 }
 
+// Function to plot task-related graphs properly
+function plotTaskGraph(taskData) {
+    if (!Array.isArray(taskData) || taskData.length === 0) {
+        console.warn("No valid task data available.");
+        alert("No valid task data available.");
+        return;
+    }
+
+    // console.log("🔍 Processing task data...", taskData);
+
+    // Generate counts for each category
+    const pickCounts = generateCounts(taskData, "sourceLocation");
+    const dropCounts = generateCounts(taskData, "destinationLocation");
+    const pickToDropCounts = generatePickToDropCounts(taskData);
+    const robotTaskCounts = generateCounts(taskData, "robotId");
+
+    // Filter out robotIds with zero tasks
+    let filteredRobotIds = [];
+    let filteredRobotValues = [];
+    Object.keys(robotTaskCounts).forEach(robotId => {
+        if (robotTaskCounts[robotId] > 0) {
+            filteredRobotIds.push(robotId);
+            filteredRobotValues.push(robotTaskCounts[robotId]);
+        }
+    });
+
+    // Ensure the divs exist before plotting
+    ensureTaskGraphDiv("task-plot-pick");
+    ensureTaskGraphDiv("task-plot-drop");
+    ensureTaskGraphDiv("task-plot-pick-drop");
+    ensureTaskGraphDiv("task-plot-robot");
+
+    // Plot all graphs immediately (no delay needed)
+    plotBarChart("task-plot-pick", "Pick Tasks", Object.keys(pickCounts), Object.values(pickCounts), "blue");
+    plotBarChart("task-plot-drop", "Drop Tasks", Object.keys(dropCounts), Object.values(dropCounts), "orange");
+    plotBarChart("task-plot-pick-drop", "Pick to Drop", Object.keys(pickToDropCounts), Object.values(pickToDropCounts), "green");
+
+    if (filteredRobotIds.length > 0) {
+        plotBarChart("task-plot-robot", "Tasks by Robot", filteredRobotIds, filteredRobotValues, "red");
+    } else {
+        console.warn("⚠️ No robots have completed any tasks.");
+        alert("No robots have completed any tasks.");
+    }
+}
 // Function to plot a bar chart
 function plotBarChart(divId, title, labels, values, color) {
     let trace = {
@@ -1407,12 +1219,12 @@ function plotBarChart(divId, title, labels, values, color) {
 
     let layout = {
         title: title,
-        xaxis: { 
-            title: "Category", 
+        xaxis: {
+            title: "Category",
             tickangle: -45,
-            type: "category", // ✅ Treat x-axis as categorical
-            categoryorder: "array", // ✅ Prevents auto-scaling
-            categoryarray: labels // ✅ Forces Plotly to use only these labels
+            type: "category",
+            categoryorder: "array",
+            categoryarray: labels
         },
         yaxis: { title: "Task Count" },
         margin: { t: 50, r: 50, b: 100, l: 50 }
@@ -1421,83 +1233,203 @@ function plotBarChart(divId, title, labels, values, color) {
     Plotly.newPlot(divId, [trace], layout);
 }
 
-// Function to plot all graphs one after another in the same div
-function plotTaskGraph(taskData, divId) {
-    if (!Array.isArray(taskData) || taskData.length === 0) {
-        console.warn("No valid task data available.");
-        alert("No valid task data available.");
+/////////////////////////            Delay Graph
+// Function to create divs dynamically if they don't exist
+function ensureDivExists(divId) {
+    let container = document.getElementById("graph-container");
+    if (!document.getElementById(divId)) {
+        let newDiv = document.createElement("div");
+        newDiv.id = divId;
+        newDiv.style.marginBottom = "20px"; // Add some spacing
+        container.appendChild(newDiv);
+    }
+}
+
+// Function to parse timestamps from JSON data
+function parseTimestamp(timestamp) {
+    if (!timestamp) return null;
+
+    // Handle timestamps in "YYYY:MM:DD HH:MM:SS.SSS" format
+    let parts = timestamp.match(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2}.\d{3})/);
+    if (parts) {
+        return new Date(`${parts[1]}-${parts[2]}-${parts[3]}T${parts[4]}:${parts[5]}:${parts[6]}Z`).getTime();
+    }
+
+    return new Date(timestamp).getTime(); // Fallback
+}
+
+// Function to plot Delay Histograms separately with Task ID on X-axis
+function plotDelayHistograms(delayData) {
+    if (!Array.isArray(delayData) || delayData.length === 0) {
+        console.warn("🚨 No valid delay data available.");
+        alert("No valid delay data available.");
         return;
     }
 
-    console.log("Processing task data...", taskData);
+    let loadingTimes = [];
+    let taskDelays = [];
+    let taskCycleTimes = [];
+    let taskIds = [];
 
-    // Generate counts for each category
-    const pickCounts = generateCounts(taskData, "sourceLocation");
-    const dropCounts = generateCounts(taskData, "destinationLocation");
-    const pickToDropCounts = generatePickToDropCounts(taskData);
-    const robotTaskCounts = generateCounts(taskData, "robotId");
+    delayData.forEach(entry => {
+        let recvTime = parseTimestamp(entry.RecvTime);
+        let pickTime = parseTimestamp(entry.PickTime);
+        let assignTime = parseTimestamp(entry.AssignTime);
+        let rapTime = parseTimestamp(entry.RAPTime);
+        let completedTime = parseTimestamp(entry.CompletedTime);
 
-    // ✅ Filter out robotIds with zero tasks
-    let filteredRobotIds = [];
-    let filteredRobotValues = [];
-    
-    Object.keys(robotTaskCounts).forEach(robotId => {
-        if (robotTaskCounts[robotId] > 0) {
-            filteredRobotIds.push(robotId);
-            filteredRobotValues.push(robotTaskCounts[robotId]);
+        // Ensure taskId is stored as a string to avoid scientific notation
+        if (entry.taskId) {
+            taskIds.push(entry.taskId.toString());  // Convert taskId to string
+        }
+
+        if (recvTime && pickTime) {
+            loadingTimes.push((pickTime - recvTime) / 1000);
+        } else {
+            loadingTimes.push(null);
+        }
+
+        if (assignTime && rapTime && rapTime > 0) {
+            taskDelays.push((assignTime - rapTime) / 1000);
+        } else {
+            taskDelays.push(null);
+        }
+
+        if (completedTime && pickTime) {
+            taskCycleTimes.push((completedTime - pickTime) / 1000);
+        } else {
+            taskCycleTimes.push(null);
         }
     });
 
-    console.log("Filtered Robot Task Counts:", { filteredRobotIds, filteredRobotValues });
+    // Ensure the divs exist before plotting
+    ensureDivExists("delay-plot-loading");
+    ensureDivExists("delay-plot-task");
+    ensureDivExists("delay-plot-cycle");
 
-    // Render graphs in the same div (overriding one after another)
-    setTimeout(() => {
-        plotBarChart(divId, "Pick Tasks", Object.keys(pickCounts), Object.values(pickCounts), "blue");
-    }, 0);
+    // Function to plot a bar chart with average time
+    function plotBarChart(data, title, color, delay, divId) {
+        setTimeout(() => {
+            let avgTime = data.reduce((sum, val) => sum + (val || 0), 0) / data.length;
 
-    setTimeout(() => {
-        plotBarChart(divId, "Drop Tasks", Object.keys(dropCounts), Object.values(dropCounts), "orange");
-    }, 2000);
+            let trace = {
+                x: taskIds,
+                y: data,
+                type: "bar",
+                marker: { color: color },
+                name: title
+            };
 
-    setTimeout(() => {
-        plotBarChart(divId, "Pick to Drop", Object.keys(pickToDropCounts), Object.values(pickToDropCounts), "green");
-    }, 4000);
+            let avgLine = {
+                x: taskIds,
+                y: Array(taskIds.length).fill(avgTime),
+                type: "scatter",
+                mode: "lines",
+                line: { dash: "dash", color: "red" },
+                name: "Average Time"
+            };
 
-    setTimeout(() => {
-        if (filteredRobotIds.length > 0) {
-            plotBarChart(divId, "Tasks by Robot", filteredRobotIds, filteredRobotValues, "red");
-        } else {
-            console.warn("No robots have completed any tasks.");
-            alert("No robots have completed any tasks.");
+            let layout = {
+                title: title,
+                xaxis: { 
+                    title: "Task ID", 
+                    tickangle: -45,
+                    tickmode: "array",
+                    tickvals: taskIds, 
+                    ticktext: taskIds.map(id => id)  // Ensure full taskId is displayed
+                },
+                yaxis: { title: "Time Taken (seconds)" },
+                bargap: 0.1
+            };
+
+            Plotly.newPlot(divId, [trace, avgLine], layout);
+        }, delay);
+    }
+
+    // Plot each delay type in its separate div with different timeouts
+    plotBarChart(loadingTimes, "Loading Delay", "blue", 500, "delay-plot-loading");
+    plotBarChart(taskDelays, "Task Delay", "orange", 1000, "delay-plot-task");
+    plotBarChart(taskCycleTimes, "Task Cycle Time", "green", 1500, "delay-plot-cycle");
+}
+
+/////////////////////////            Download PDF Graph
+
+async function downloadPlotsAsPDF() {
+    console.log("🚀 Download function started...");
+
+    const { jsPDF } = window.jspdf;
+    let pdf = new jsPDF("p", "mm", "a4");
+
+    let plotContainer = document.getElementById("graph-container");
+
+    if (!plotContainer) {
+        console.error("❌ Error: #graph-container not found!");
+        alert("Error: No graph container found.");
+        return;
+    }
+
+    // ✅ Filter valid plots (visible, containing .plotly elements)
+    let plots = [...plotContainer.children].filter(plot => 
+        plot.querySelector(".plotly") && plot.offsetHeight > 0 && plot.offsetWidth > 0
+    );
+
+    console.log(`🔍 Found ${plots.length} valid plots to download.`);
+
+    if (plots.length === 0) {
+        alert("No plots available to download.");
+        return;
+    }
+
+    let yOffset = 15; // Start position in PDF
+    const maxHeight = 250; // Maximum height per page (adjust as needed)
+
+    for (let i = 0; i < plots.length; i++) {
+        let plot = plots[i];
+        console.log(`🎨 Processing plot ${i + 1}...`);
+
+        try {
+            // ✅ Convert plot to canvas with optimized scale
+            let canvas = await html2canvas(plot, { scale: 1.5 });
+            console.log(`✅ Plot ${i + 1} converted to canvas.`);
+
+            let imgData = canvas.toDataURL("image/png");
+            let imgWidth = 180; // Fixed image width (in mm)
+            let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // ✅ Check if new page is needed
+            if (yOffset + imgHeight > maxHeight) {
+                pdf.addPage();
+                yOffset = 15; // Reset Y position
+            }
+
+            pdf.addImage(imgData, "PNG", 15, yOffset, imgWidth, imgHeight);
+            yOffset += imgHeight + 10; // Move Y position for next plot
+
+            console.log(`📌 Plot ${i + 1} added to PDF.`);
+        } catch (error) {
+            console.error(`❌ Error capturing plot ${i + 1}:`, error);
         }
-    }, 6000);
+    }
+
+    console.log("📥 Saving PDF...");
+    pdf.save("plots_report.pdf");
+    console.log("✅ Download completed.");
 }
 
+// ✅ Ensure the download button works
+document.addEventListener("DOMContentLoaded", function () {
+    let downloadBtn = document.getElementById("download-btn");
+    if (downloadBtn) {
+        downloadBtn.addEventListener("click", async function () {
+            await downloadPlotsAsPDF();
+        });
+    } else {
+        console.error("❌ Download button not found.");
+    }
+});
 
+// ✅ Debugging log for script loading
+window.onload = function () {
+    console.log("✅ Script loaded successfully.");
+};
 
-// Function to plot Delay Graph
-function plotDelayGraph(delayData, divId) {
-    if (delayData.length === 0) return;
-
-    let timestamps = delayData.map(entry => new Date(entry.lastModifiedDate.$date));
-    let waitingTimes = delayData.map(entry => entry.totalTaskWaitingTime || 0);
-
-    let trace = {
-        x: timestamps,
-        y: waitingTimes,
-        type: "scatter",
-        mode: "lines+markers",
-        name: "Total Task Waiting Time",
-        line: { color: "orange" }
-    };
-
-    let layout = {
-        title: "Task Delay Over Time",
-        xaxis: { title: "Time" },
-        yaxis: { title: "Waiting Time" },
-        hovermode: "closest",
-        dragmode: "pan"
-    };
-
-    Plotly.newPlot(divId, [trace], layout, { scrollZoom: true });
-}
