@@ -11,6 +11,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjsf-adapter-date-fns"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 
 </head>
 <body>
@@ -53,6 +56,7 @@
     
             <!-- Submit Button -->
             <button type="button" class="submit-btn" onclick="validateAndShowPopup()">Submit</button>
+            <button type="button" class="download-btn" onclick="downloadPlotsAsPDF()">Download All Plots</button>
         </div>
     </form>
     <!-- Plot Selection Popup -->
@@ -335,7 +339,6 @@
     </div>
 
     <div id="graph-container" class="graph-container"></div>
-
 
     <script src="script.js"></script>
 
