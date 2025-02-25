@@ -1355,81 +1355,84 @@ function plotDelayHistograms(delayData) {
 /////////////////////////            Download PDF Graph
 
 async function downloadPlotsAsPDF() {
-    console.log("🚀 Download function started...");
+    // console.log(" Starting fast plot capture...");
 
     const { jsPDF } = window.jspdf;
     let pdf = new jsPDF("p", "mm", "a4");
-
     let plotContainer = document.getElementById("graph-container");
 
     if (!plotContainer) {
-        console.error("❌ Error: #graph-container not found!");
+        console.error("Error: #graph-container not found!");
         alert("Error: No graph container found.");
         return;
     }
 
-    // ✅ Filter valid plots (visible, containing .plotly elements)
-    let plots = [...plotContainer.children].filter(plot => 
+    let plots = [...plotContainer.children].filter(plot =>
         plot.querySelector(".plotly") && plot.offsetHeight > 0 && plot.offsetWidth > 0
     );
 
-    console.log(`🔍 Found ${plots.length} valid plots to download.`);
+    console.log(`🔍 Found ${plots.length} valid plots.`);
 
     if (plots.length === 0) {
-        alert("No plots available to download.");
+        alert("No plots available to save.");
         return;
     }
 
-    let yOffset = 15; // Start position in PDF
-    const maxHeight = 250; // Maximum height per page (adjust as needed)
+    let images = [];
 
-    for (let i = 0; i < plots.length; i++) {
-        let plot = plots[i];
-        console.log(`🎨 Processing plot ${i + 1}...`);
-
+    // Capture all plots in parallel for speed
+    let capturePromises = plots.map(async (plot, index) => {
+        // console.log(`Capturing plot ${index + 1}...`);
         try {
-            // ✅ Convert plot to canvas with optimized scale
-            let canvas = await html2canvas(plot, { scale: 1.5 });
-            console.log(`✅ Plot ${i + 1} converted to canvas.`);
-
-            let imgData = canvas.toDataURL("image/png");
-            let imgWidth = 180; // Fixed image width (in mm)
-            let imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            // ✅ Check if new page is needed
-            if (yOffset + imgHeight > maxHeight) {
-                pdf.addPage();
-                yOffset = 15; // Reset Y position
-            }
-
-            pdf.addImage(imgData, "PNG", 15, yOffset, imgWidth, imgHeight);
-            yOffset += imgHeight + 10; // Move Y position for next plot
-
-            console.log(`📌 Plot ${i + 1} added to PDF.`);
+            let imgData = await Plotly.toImage(plot, { format: "png", width: 800, height: 400 });
+            images.push(imgData);
+            // console.log(`Plot ${index + 1} captured.`);
         } catch (error) {
-            console.error(`❌ Error capturing plot ${i + 1}:`, error);
+            console.error(`Error capturing plot ${index + 1}:`, error);
         }
-    }
+    });
 
-    console.log("📥 Saving PDF...");
+    await Promise.all(capturePromises);
+
+    // console.log("Merging images into PDF...");
+
+    let yPosition = 20;
+    let imgWidth = 180;
+    let margin = 5;
+    let pageHeight = pdf.internal.pageSize.height;
+
+    images.forEach((img, i) => {
+        let imgHeight = 90;
+
+        if (yPosition + imgHeight > pageHeight - margin) {
+            pdf.addPage();
+            yPosition = 20;
+        }
+
+        pdf.setTextColor(255, 0, 0);
+        pdf.setFontSize(20);
+        pdf.text("ADDVERB", 10, 15); // Top-left corner
+
+        pdf.addImage(img, "PNG", 15, yPosition, imgWidth, imgHeight);
+        yPosition += imgHeight + margin;
+    });
+
+    //  console.log(" Saving PDF...");
     pdf.save("plots_report.pdf");
-    console.log("✅ Download completed.");
+    // console.log(" Download completed.");
 }
 
-// ✅ Ensure the download button works
+// Attach to Button Click
 document.addEventListener("DOMContentLoaded", function () {
     let downloadBtn = document.getElementById("download-btn");
     if (downloadBtn) {
-        downloadBtn.addEventListener("click", async function () {
-            await downloadPlotsAsPDF();
-        });
+        downloadBtn.addEventListener("click", downloadPlotsAsPDF);
     } else {
-        console.error("❌ Download button not found.");
+        console.error(" Download button not found.");
     }
 });
 
-// ✅ Debugging log for script loading
+// Debugging Log
 window.onload = function () {
-    console.log("✅ Script loaded successfully.");
+    // console.log("Script loaded successfully.");
 };
-
