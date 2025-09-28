@@ -150,7 +150,7 @@ async function submitFleetFilters() {
         const entryDateTime = new Date(entry.lastModifiedDate.$date);
         return entryDateTime >= startDate && entryDateTime <= endDate;
     });
-    const errorFilteredData = filteredData.filter(entry => entry.eventCode === 0 || entry.eventCode === 1);
+    const errorFilteredData = filteredData.filter(entry => entry.errorCode === 0 || entry.errorCode === 1);
 
     if (errorFilteredData.length === 0) {
         alert("No data found for the selected date, time range, or error codes 0 and 1.");
@@ -158,14 +158,14 @@ async function submitFleetFilters() {
     }
 
     const timestamps = errorFilteredData.map(entry => new Date(entry.lastModifiedDate.$date));
-    const errorCodes = errorFilteredData.map(entry => entry.eventCode);
+    const errorCodes = errorFilteredData.map(entry => entry.errorCode);
     const errorMessages = errorFilteredData.map(entry => entry.errorMessage);
 
-    const manualError0Count = errorFilteredData.filter(entry => entry.eventCode === 0 && entry.errorMessage === "MANUAL").length;
+    const manualError0Count = errorFilteredData.filter(entry => entry.errorCode === 0 && entry.errorMessage === "MANUAL").length;
     const outOfPathError0Count = errorFilteredData.filter(entry =>
-        entry.eventCode === 0 && entry.errorMessage.startsWith("OUT_OF_PATH")
+        entry.errorCode === 0 && entry.errorMessage.startsWith("OUT_OF_PATH")
     ).length;
-    const manualError1Count = errorFilteredData.filter(entry => entry.eventCode === 1 && entry.errorMessage === "MANUAL").length;
+    const manualError1Count = errorFilteredData.filter(entry => entry.errorCode === 1 && entry.errorMessage === "MANUAL").length;
 
     const trace = {
         x: timestamps,
@@ -175,9 +175,9 @@ async function submitFleetFilters() {
         text: errorMessages,
         marker: {
             color: errorFilteredData.map(entry => {
-                if (entry.eventCode === 0 && entry.errorMessage === "MANUAL") return 'blue';
-                if (entry.eventCode === 0 && entry.errorMessage.startsWith("OUT_OF_PATH")) return 'green';
-                if (entry.eventCode === 1 && entry.errorMessage === "MANUAL") return 'orange';
+                if (entry.errorCode === 0 && entry.errorMessage === "MANUAL") return 'blue';
+                if (entry.errorCode === 0 && entry.errorMessage.startsWith("OUT_OF_PATH")) return 'green';
+                if (entry.errorCode === 1 && entry.errorMessage === "MANUAL") return 'orange';
                 return 'grey';
             })
         },
@@ -241,7 +241,7 @@ document.getElementById("json-file").addEventListener("change", (event) => {
             const rawData = JSON.parse(e.target.result);
             const processedData = rawData.map(item => ({
                 robotId: item.robotId,
-                eventCode: item.eventCode,
+                errorCode: item.errorCode,
                 lastModifiedDate: new Date(item.lastModifiedDate.$date),
             }));
 
@@ -283,13 +283,13 @@ function filterAndPlotErrors() {
     let filteredData = window.errorData;
 
     if (robotId) filteredData = filteredData.filter(item => item.robotId == robotId);
-    if (errorType && errorType !== "all") filteredData = filteredData.filter(item => item.eventCode == errorType);
+    if (errorType && errorType !== "all") filteredData = filteredData.filter(item => item.errorCode == errorType);
     if (!isNaN(startTime)) filteredData = filteredData.filter(item => item.lastModifiedDate >= startTime);
     if (!isNaN(endTime)) filteredData = filteredData.filter(item => item.lastModifiedDate <= endTime);
 
     const errorCounts = {};
     filteredData.forEach(item => {
-        errorCounts[item.eventCode] = (errorCounts[item.eventCode] || 0) + 1;
+        errorCounts[item.errorCode] = (errorCounts[item.errorCode] || 0) + 1;
     });
 
     plotBarGraph(Object.keys(errorCounts).map(code => `Error ${code}`), Object.values(errorCounts));
@@ -337,7 +337,7 @@ function filterAndPlotNetwork() {
 
     let filteredData = window.networkData.filter(entry => {
         const entryDate = new Date(entry.lastModifiedDate.$date);
-        return entry.eventCode === 404 && entryDate >= startDateTime && entryDate <= endDateTime;
+        return entry.errorCode === 404 && entryDate >= startDateTime && entryDate <= endDateTime;
     });
 
     if (selectedRobots.length && !selectedRobots.includes("all")) {
@@ -991,7 +991,7 @@ function submitForm() {
                     if (jsonData.some(entry => entry.hasOwnProperty("taskId") && entry.hasOwnProperty("sourceLocation") && entry.hasOwnProperty("destinationLocation") && entry.hasOwnProperty("robotId"))) {
                         taskData.push(...jsonData);
                     }
-                    else if (jsonData.some(entry => entry.hasOwnProperty("eventCode") && entry.hasOwnProperty("errorCount"))) {
+                    else if (jsonData.some(entry => entry.hasOwnProperty("errorCode") && entry.hasOwnProperty("errorCount"))) {
                         errorData.push(...jsonData);
                     }
                     else if (jsonData.some(entry => entry.hasOwnProperty("throughput") && entry.hasOwnProperty("lastModifiedDate"))) {
@@ -1066,11 +1066,11 @@ function plotErrorGraph(errorData, divId) {
 
     let errorCounts = {};
 
-    // Count occurrences of each eventCode
+    // Count occurrences of each errorCode
     errorData.forEach(entry => {
-        if (entry.hasOwnProperty("eventCode")) {
-            let eventCode = String(entry.eventCode);
-            errorCounts[eventCode] = (errorCounts[eventCode] || 0) + 1;
+        if (entry.hasOwnProperty("errorCode")) {
+            let errorCode = String(entry.errorCode);
+            errorCounts[errorCode] = (errorCounts[errorCode] || 0) + 1;
         }
     });
     let sortedData = Object.entries(errorCounts)
